@@ -16,6 +16,7 @@
 
 #include <ti/devices/msp/msp.h> 
 #include <stdint.h>
+#include <ti/devices/msp/peripherals/hw_i2c.h>
 #include "i2c.h"
 
 /**
@@ -25,32 +26,38 @@
 */
 void I2C1_init(uint16_t targetAddress){
 		//if not reset
-	if (UART0->GPRCM.STAT & UART_GPRCM_STAT_RESETSTKY_MASK){
+	if (I2C1->GPRCM.STAT & I2C_STAT_RESETSTKY_MASK){
 		//reset
-		UART0->GPRCM.RSTCTL = UART_RSTCTL_KEY_UNLOCK_W | UART_RSTCTL_RESETASSERT_ASSERT;
+		I2C1->GPRCM.RSTCTL = I2C_RSTCTL_KEY_UNLOCK_W | I2C_RSTCTL_RESETASSERT_ASSERT;
 		//enable
-		UART0->GPRCM.PWREN = UART_PWREN_KEY_UNLOCK_W | UART_PWREN_ENABLE_ENABLE;
+		I2C1->GPRCM.PWREN = I2C_PWREN_KEY_UNLOCK_W | I2C_PWREN_ENABLE_ENABLE;
 	} //end if
 	
-	//config IOMUX RX, input enabled
-	IOMUX->SECCFG.PINCM[IOMUX_PINCM22] &= ~IOMUX_PINCM_PF_MASK; //clear pf
-	IOMUX->SECCFG.PINCM[IOMUX_PINCM22] = 		IOMUX_PINCM_PC_CONNECTED 
-																				| IOMUX_PINCM22_PF_UART0_RX 
+	//config SDA, input enabled
+	IOMUX->SECCFG.PINCM[IOMUX_PINCM16] &= ~IOMUX_PINCM_PF_MASK; //clear pf
+	IOMUX->SECCFG.PINCM[IOMUX_PINCM16] = 		IOMUX_PINCM_PC_CONNECTED 
+																				| IOMUX_PINCM16_PF_I2C1_SDA 
 																				| IOMUX_PINCM_INENA_ENABLE;
 	
-	//config IOMUX TX
-	IOMUX->SECCFG.PINCM[IOMUX_PINCM21] &= ~IOMUX_PINCM_PF_MASK; //clear pf
-	IOMUX->SECCFG.PINCM[IOMUX_PINCM21] = 		IOMUX_PINCM_PC_CONNECTED
-																				| IOMUX_PINCM21_PF_UART0_TX;
+	//config SCL
+	IOMUX->SECCFG.PINCM[IOMUX_PINCM15] &= ~IOMUX_PINCM_PF_MASK; //clear pf
+	IOMUX->SECCFG.PINCM[IOMUX_PINCM15] = 		IOMUX_PINCM_PC_CONNECTED
+																				| IOMUX_PINCM15_PF_I2C1_SCL;
 	
 	//select BUSCLK
-	UART0->CLKSEL = UART_CLKSEL_BUSCLK_SEL_ENABLE;
+	I2C1->CLKSEL = I2C_CLKSEL_BUSCLK_SEL_ENABLE;
 	
 	//clcok division = 1
 	//set to 0
-	UART0->CLKDIV = UART_CLKDIV_RATIO_DIV_BY_1;
+	I2C1->CLKDIV = I2C_CLKDIV_RATIO_DIV_BY_1;
 	
-	//disable UART clear ENABLE bit of CTL0
+	//disable analog glitch suppresion
+	I2C1->GFCTL &= ~I2C_GFCTL_AGFEN_ENABLE;
+	
+	//clear controller control register
+	I2C1->MASTER.MCTR = 0;
+	
+	//disable I2C clear ENABLE bit of CTL0
 	UART0->CTL0 &= ~UART_CTL0_ENABLE_ENABLE; 
 	
 	//set oversampling to 16x
