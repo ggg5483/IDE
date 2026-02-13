@@ -19,7 +19,7 @@
 
 unsigned char OLED_TEXT_ARR[1024];
 unsigned char OLED_GRAPH_ARR[1024];
-#define MAIN 2
+#define MAIN 1
 
 #if MAIN == 1
 int main(void)
@@ -61,7 +61,7 @@ int main(void)
     while (1)
     {
 			OLED_write_display(OLED_TEXT_ARR);
-			for(volatile int j = 0; j <10000; j++){}
+			for(volatile int j = 0; j <100000000; j++){}
     }
 
     return 0;
