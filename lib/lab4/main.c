@@ -23,19 +23,25 @@ int main(void)
 {
     // 1. Initialize the OLED display
     OLED_Init();
+	
+	OLED_display_clear();
 
+		OLED_draw_line(1, 1, (unsigned char *)"Hello World");
     // 2. Write “Hello World” on line 1, column 1
-    OLED_Print(1, 1, "Hello World");
+    //OLED_Print(1, 1, "Hello World");
 
     // 3. Write “How are you?” on line 2, column 2
-    OLED_Print(2, 2, "How are you?");
-
+    //OLED_Print(2, 2, "How are you?");
+		OLED_draw_line(2, 2, (unsigned char *)"How are you?");
+	
     // 4. Write “Goodbye” on line 3, column 3
-    OLED_Print(3, 3, "Goodbye");
+    //OLED_Print(3, 3, "Goodbye");
+		OLED_draw_line(3, 3, (unsigned char *)"Goodbye");
 	
 	  // 8. Write name "for check off" on line 4 column 4
-	  OLED_Print(4, 4, "Alex & Garrett");
-
+	  //OLED_Print(4, 4, "Alex & Garrett");
+		OLED_draw_line(4, 4, (unsigned char *)"Alex & Garrett");
+	
     // 5. Create fake 14-bit camera line data (0 ? 214), 128 samples stored in a uint16_t array
     uint16_t fake_camera_line[128];
 
@@ -46,11 +52,13 @@ int main(void)
     }
 
     // 6. Display the fake camera data on the OLED
-    OLED_DisplayCameraData(fake_camera_line);
+    //OLED_DisplayCameraData(fake_camera_line);
 
     // 7. Loop forever
     while (1)
     {
+			OLED_write_display(OLED_TEXT_ARR);
+			for(volatile int j = 0; j <10000; j++){}
     }
 
     return 0;

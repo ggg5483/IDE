@@ -8,7 +8,8 @@
  *             Target     <-> Slave
  *             This changes register access from what the documentation specifies
  *
- * @author 
+ * @author  GArrett
+ * @author  Alex
  * @date 
  * ******************************************************************************
 */
@@ -39,13 +40,13 @@ void I2C1_init(uint16_t targetAddress){
 	
 	//config SDA, input enabled
 	//IOMUX->SECCFG.PINCM[IOMUX_PINCM16] &= ~IOMUX_PINCM_PF_MASK; //clear pf
-	IOMUX->SECCFG.PINCM[IOMUX_PINCM16] |= 		IOMUX_PINCM_PC_CONNECTED 
+	IOMUX->SECCFG.PINCM[IOMUX_PINCM16] = 		IOMUX_PINCM_PC_CONNECTED 
 																				| IOMUX_PINCM16_PF_I2C1_SDA 
 																				| IOMUX_PINCM_INENA_ENABLE;
 	
 	//config SCL
 	//IOMUX->SECCFG.PINCM[IOMUX_PINCM15] &= ~IOMUX_PINCM_PF_MASK; //clear pf
-	IOMUX->SECCFG.PINCM[IOMUX_PINCM15] |= 		IOMUX_PINCM_PC_CONNECTED
+	IOMUX->SECCFG.PINCM[IOMUX_PINCM15] = 		IOMUX_PINCM_PC_CONNECTED
 																				| IOMUX_PINCM15_PF_I2C1_SCL
 																				| IOMUX_PINCM_INENA_ENABLE;
 	
@@ -67,13 +68,13 @@ void I2C1_init(uint16_t targetAddress){
 	
 	
 	//RX trigger FIFO contains >= 1 byte
-	I2C1->MASTER.MFIFOCTL |= I2C_MFIFOCTL_TXTRIG_EMPTY | I2C_MFIFOCTL_RXTRIG_LEVEL_1;
+	I2C1->MASTER.MFIFOCTL = I2C_MFIFOCTL_TXTRIG_EMPTY | I2C_MFIFOCTL_RXTRIG_LEVEL_1;
 	// TX trigger FIFO is empty
 	
 	//I2C1->MASTER.MFIFOCTL |= ~I2C_MFIFOCTL_RXTRIG_MASK;
 	
 	//disable clock streaching
-	I2C1->MASTER.MCR = ~(I2C_MCR_CLKSTRETCH_MASK);
+	I2C1->MASTER.MCR &= ~(I2C_MCR_CLKSTRETCH_MASK);
 	
 	//set target address
 	//I2C1->MASTER.MCR &= ~I2C_MSA_SADDR_MASK;
@@ -94,10 +95,7 @@ void I2C1_init(uint16_t targetAddress){
 void I2C1_putchar(unsigned char ch){
 	//wait until tx fifo not full
 	while(!((I2C1->MASTER.MFIFOSR & I2C_MFIFOSR_TXFIFOCNT_MASK) >=  I2C_MFIFOSR_TXFIFOCNT_MINIMUM)) {
-		#if 0
-		volatile int testing = I2C1->MASTER.MFIFOSR;
-		testing = ((I2C1->MASTER.MFIFOSR & I2C_MFIFOSR_TXFIFOCNT_MASK) >> 8);
-		#endif //debug
+		
 	} //while
 		
 	//transmit data
@@ -127,9 +125,10 @@ void I2C1_put(unsigned char *data, uint16_t data_size){
 	
 	
 	//I2C1->MASTER.MCTR &= ~I2C_MCTR_MBLEN_MASK;
-	I2C1->MASTER.MCTR |= ((data_size << I2C_MCTR_MBLEN_OFS) & I2C_MCTR_MBLEN_MAXIMUM);
-	I2C1->MASTER.MCTR |= I2C_MCTR_BURSTRUN_ENABLE;
-	I2C1->MASTER.MCTR |= I2C_MCTR_START_ENABLE | I2C_MCTR_STOP_ENABLE;
+	I2C1->MASTER.MCTR |= (((unsigned int) data_size << I2C_MCTR_MBLEN_OFS) & I2C_MCTR_MBLEN_MAXIMUM);
+	I2C1->MASTER.MCTR |= I2C_MCTR_BURSTRUN_ENABLE | I2C_MCTR_START_ENABLE | I2C_MCTR_STOP_ENABLE;
+	//I2C1->MASTER.MCTR |= ;
+	
 	for(int i = 0; i < data_size; i++){
 		I2C1_putchar(data[i]);
 		
@@ -140,7 +139,7 @@ void I2C1_put(unsigned char *data, uint16_t data_size){
 	}
 		
 	//turn off burst run
-	I2C1->MASTER.MCTR &= ~I2C_MCTR_BURSTRUN_ENABLE;
+	I2C1->MASTER.MCTR &= ~(I2C_MCTR_MBLEN_MASK | I2C_MCTR_BURSTRUN_ENABLE);
 		
 	//direction recieve
 	//I2C1->MASTER.MSA |= I2C_MSA_DIR_MASK;
