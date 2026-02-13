@@ -19,6 +19,10 @@
 #include <ti/devices/msp/peripherals/hw_i2c.h>
 #include "i2c.h"
 
+#ifndef DEBUG
+#define DEBUG true
+#endif
+
 /**
  * @brief Initialize I2C1
  * @param[in] targetAddress - Passed by OLED file. I2C target/listener address
@@ -57,34 +61,28 @@ void I2C1_init(uint16_t targetAddress){
 	//clear controller control register
 	I2C1->MASTER.MCTR = 0;
 	
-	//disable I2C clear ENABLE bit of CTL0
-	UART0->CTL0 &= ~UART_CTL0_ENABLE_ENABLE; 
+	//set clock timer period
+	I2C1->MASTER.MTPR = 0x1F;
 	
-	//set oversampling to 16x
-	//clear both HSE bits
-	UART0->CTL0 &= ~UART_CTL0_HSE_MASK;
+	//RX trigger FIFO contains >= 1 byte
+	I2C1->MASTER.MFIFOCTL &= ~I2C_MFIFOCTL_TXTRIG_MASK ;
+	// TX trigger FIFO is empty
+	I2C1->MASTER.MFIFOCTL &= ~I2C_MFIFOCTL_RXTRIG_MASK;
 	
-	//set the Transmit Enable, Receive Enable, and FIFO enable
-	UART0->CTL0 |= UART_CTL0_TXE_ENABLE | UART_CTL0_RXE_ENABLE | UART_CTL0_FEN_ENABLE;
+	//disable clock streaching
+	I2C1->MASTER.MCR &= ~I2C_MCR_CLKSTRETCH_MASK;
 	
-	//set baud rate 9600
-	//BRD = UART Clock / (Oversampling x Baud rate) 
-	float clk = CLK_RATE;
-	clk = clk /(SAMPLING*BAUD_RATE);
-	UART0->IBRD = (int) clk;
+	//set target address
+	I2C1->MASTER.MCR &= ~I2C_MSA_SADDR_MASK;
+	I2C1->MASTER.MCR |= ((targetAddress << 1) & I2C_MSA_SADDR_MASK);
 	
-	clk = clk - (int) clk;
-	clk = (clk * 64) + 0.5;
-	UART0->FBRD = (int) clk;
-	
-	//8 data 1 stop 0 parity
-	UART0->LCRH |= UART_LCRH_WLEN_DATABIT8;
-	UART0->LCRH &= ~UART_LCRH_STP2_ENABLE;
-	UART0->LCRH &= ~UART_LCRH_PEN_ENABLE;
+	//enable I2C controller
+	I2C1->MASTER.MCTR = I2C_MCR_ACTIVE_ENABLE;
 	
 	
 	// enable UART enable ENABLE bit of CTL0
 	UART0->CTL0 |= UART_CTL0_ENABLE_ENABLE; 
+	
 }
 
 
@@ -93,16 +91,16 @@ void I2C1_init(uint16_t targetAddress){
  * @param[in] ch - Byte to send
 */
 void I2C1_putchar(unsigned char ch){
-	//wait untill fifo not full
-	while((UART0->STAT & UART_STAT_TXFF_MASK)) {
+	//wait until tx fifo not full
+	while(((I2C1->MASTER.MFIFOSR & I2C_MFIFOSR_TXFIFOCNT_MASK) >> 8) > 0 ) {
 		#if DEBUG
-		volatile int testing = UART0->STAT;
-		testing = UART0->STAT & UART_STAT_TXFF_MASK;
+		volatile int testing = I2C1->MASTER.MFIFOSR;
+		testing = ((I2C1->MASTER.MFIFOSR & I2C_MFIFOSR_TXFIFOCNT_MASK) >> 8);
 		#endif //debug
 	} //while
 		
 	//transmit data
-	UART0->TXDATA = ch;
+	I2C1->MASTER.MTXDATA = ch;
 }
 
 
@@ -117,7 +115,7 @@ void I2C1_put(unsigned char *data, uint16_t data_size){
 	while(ch != '\0'){
 		I2C1_putchar(ch);
 		ch = data[i++];
-		if (i = data_size){break;}//this may need testing
+		if (i == data_size){break;}//this may need testing
 	}
 }
 
