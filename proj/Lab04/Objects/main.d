@@ -35,4 +35,5 @@
   ../../source\ti/devices/msp/peripherals/m0p/hw_debugss.h \
   ../../source\ti/devices/msp/peripherals/m0p/hw_sysctl.h \
   ../../source\ti/devices/msp/peripherals/m0p/sysctl/hw_sysctl_mspm0g1x0x_g3x0x.h \
-  ../../lib\lab4/I2C/oled.h ../../lib\lab4/I2C/i2c.h
+  ../../lib\lab4/I2C/oled.h ../../lib\lab4/I2C/i2c.h \
+  ../../lib\lab1/switches.h

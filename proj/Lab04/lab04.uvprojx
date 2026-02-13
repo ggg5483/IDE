@@ -415,6 +415,16 @@
               <FileType>5</FileType>
               <FilePath>..\..\lib\lab4\I2C\oled.h</FilePath>
             </File>
+            <File>
+              <FileName>switches.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\lib\lab1\switches.h</FilePath>
+            </File>
+            <File>
+              <FileName>switches.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\lib\lab1\switches.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
