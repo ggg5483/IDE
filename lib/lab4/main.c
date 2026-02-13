@@ -16,6 +16,9 @@
 #include <lab4/I2C/oled.h>
 #include <lab4/I2C/i2c.h>
 
+unsigned char OLED_TEXT_ARR[1024];
+unsigned char OLED_GRAPH_ARR[1024];
+
 int main(void)
 {
     // 1. Initialize the OLED display
