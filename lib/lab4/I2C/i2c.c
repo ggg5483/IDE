@@ -8,9 +8,9 @@
  *             Target     <-> Slave
  *             This changes register access from what the documentation specifies
  *
- * @author  GArrett
- * @author  Alex
- * @date 
+ * @author  Garrett Geyer
+ * @author  Alex Hamadeh
+ * @date 2/13/26
  * ******************************************************************************
 */
 
