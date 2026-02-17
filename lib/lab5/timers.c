@@ -9,8 +9,7 @@
  * ******************************************************************************
 */
 
-#ifndef _TIMERS_H_
-#define _TIMERS_H_
+#include "timers.h"
 
 #include <stdint.h>
 
@@ -34,4 +33,3 @@ void TIMG6_init(uint32_t period, uint32_t prescaler){}
 void TIMG12_init(uint32_t period){}
 
 
-#endif // _TIMERS_H_

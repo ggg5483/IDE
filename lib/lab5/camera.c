@@ -11,8 +11,7 @@
  * ******************************************************************************
 */
 
-#ifndef _CAMERA_H_
-#define _CAMERA_H_
+#include "camera.h"
 
 #include <stdint.h>
 
@@ -27,14 +26,18 @@ void Camera_init(void){}
  * @note Make sure to check all data is available
  * @return True(1)/False(0) if camera data is ready
 */
-uint8_t Camera_isDataReady(void){}
+uint8_t Camera_isDataReady(void){
+	return 0;
+}
 
 
 /**
  * @brief Retrieves pointer to camera data array
  * @return Pointer to global data array stored locally in this file
 */
-uint16_t* Camera_getData(void){}
+uint16_t* Camera_getData(void){
+	return 0;
+}
 
 
-#endif // _CAMERA_H_
+

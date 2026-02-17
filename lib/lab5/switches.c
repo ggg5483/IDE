@@ -9,8 +9,7 @@
  * ******************************************************************************
 */
 
-#ifndef _SWITCHES_H_
-#define _SWITCHES_H_
+#include "switches.h"
 
 /**
  * @brief Switch 1 polling initialization
@@ -57,4 +56,3 @@ void S1_init_interrupt(void){}
 void S2_init_interrupt(void){}
 
 
-#endif // _SWITCHES_H_

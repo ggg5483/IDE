@@ -1,6 +1,6 @@
 /**
  * ******************************************************************************
- * @file    : adc12.h
+ * @file    : adc12.c
  * @brief   : ADC module header file
  * @details : ADC initialization and interaction
  * @note    : ADC does not require IOMUX interaction
@@ -10,15 +10,16 @@
  * ******************************************************************************
 */
 
-#ifndef _ADC12_H_
-#define _ADC12_H_
+#include "adc12.h"
 
 #include <stdint.h>
 
 /**
  * @brief Initialize ADC0
 */
-void ADC0_init(void){}
+void ADC0_init(void){
+
+}
 
 
 /**
@@ -27,7 +28,8 @@ void ADC0_init(void){}
  *       The channel is not the same as where the module stores the value
  * @return ADC0 processed value
 */
-uint32_t ADC0_getVal(void){}
+uint32_t ADC0_getVal(void){
+}
 
 
-#endif // _ADC12_H_
+
