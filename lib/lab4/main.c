@@ -1,8 +1,7 @@
 /**
  * ******************************************************************************
  * @file    : main.c
- * @brief   : 
- * @details : 
+ * @brief   : Program to display ASCII chars onto an OLED screen connected over I2c
  * 
  * @author Alex Hamadeh
  * @author Garrett Geyer
@@ -30,14 +29,14 @@ int main(void)
 	OLED_display_clear();
 
 		OLED_draw_line(1, 1, (unsigned char *)"Hello World");
-    // 2. Write “Hello World” on line 1, column 1
+    // 2. Write â€œHello Worldâ€ on line 1, column 1
     //OLED_Print(1, 1, "Hello World");
 
-    // 3. Write “How are you?” on line 2, column 2
+    // 3. Write â€œHow are you?â€ on line 2, column 2
     //OLED_Print(2, 2, "How are you?");
 		OLED_draw_line(2, 2, (unsigned char *)"How are you?");
 	
-    // 4. Write “Goodbye” on line 3, column 3
+    // 4. Write â€œGoodbyeâ€ on line 3, column 3
     //OLED_Print(3, 3, "Goodbye");
 		OLED_draw_line(3, 3, (unsigned char *)"Goodbye");
 	
