@@ -12,9 +12,14 @@
 
 
 #include "timers.h"
-
+#include "switches.h"
+#include "uart.c"
 
 int main(void){
 	
+
+	
+
+	for(;;){}
 	return 0;
 }

@@ -50,18 +50,31 @@ void TIMG0_init(uint32_t period, uint32_t prescaler){
 	TIMG0->COMMONREGS.CCLKCTL = 1;
 	
 	
-	//config down
-	//periodic
-	//counter val after enable
+	/*config down, periodic, counter val after enable is LOAD val */
 	TIMG0->COUNTERREGS.CTRCTL &= ~(GPTIMER_CTRCTL_CVAE_MASK | GPTIMER_CTRCTL_CM_MASK | GPTIMER_CTRCTL_REPEAT_MASK);
 	TIMG0->COUNTERREGS.CTRCTL |= (GPTIMER_CTRCTL_CVAE_LDVAL | GPTIMER_CTRCTL_CM_DOWN | GPTIMER_CTRCTL_REPEAT_REPEAT_1);
+
+	/*set LOAD to period*/
+	TIMG0->COUNTERREGS.LOAD = period;
 	
+	/*setup interrupts*/
+	/*disable interrupts */
+	__disable_irq();
 	
+	/*clear zero event*/
+	TIMG0->CPU_INT.ICLR |= GPTIMER_CPU_INT_ICLR_REPC_CLR;
 	
-	//set LOAD to period
+	/*enable zero event*/
+	TIMG0->CPU_INT.IMASK |= GPTIMER_CPU_INT_IMASK_REPC_SET;
 	
+	/*start timer*/
+	TIMG0->COUNTERREGS.CTRCTL |= GPTIMER_CTRCTL_EN_ENABLED;
 	
+	/*register interrupt*/
+	NVIC_EnableIRQ(TIMG0_INT_IRQn);
 	
+	/*enable interupts */
+	__enable_irq();
 }
 
 
@@ -71,6 +84,7 @@ void TIMG0_init(uint32_t period, uint32_t prescaler){
 void TIMG6_init(uint32_t period, uint32_t prescaler){
 	TIMG_power(TIMG6);
 	
+	//seelct clock source
 	TIMG6->CLKSEL = GPTIMER_CLKSEL_BUSCLK_SEL_ENABLE;
 	//slkdiv ratio
 	TIMG6->CLKDIV = 0;
@@ -79,6 +93,31 @@ void TIMG6_init(uint32_t period, uint32_t prescaler){
 	//enable timclock
 	TIMG6->COMMONREGS.CCLKCTL = 1;
 	
+	/*config down, periodic, counter val after enable is LOAD val */
+	TIMG6->COUNTERREGS.CTRCTL &= ~(GPTIMER_CTRCTL_CVAE_MASK | GPTIMER_CTRCTL_CM_MASK | GPTIMER_CTRCTL_REPEAT_MASK);
+	TIMG6->COUNTERREGS.CTRCTL |= (GPTIMER_CTRCTL_CVAE_LDVAL | GPTIMER_CTRCTL_CM_DOWN | GPTIMER_CTRCTL_REPEAT_REPEAT_1);
+
+	/*set LOAD to period*/
+	TIMG6->COUNTERREGS.LOAD = period;
+	
+	/*setup interrupts*/
+	/*disable interrupts */
+	__disable_irq();
+	
+	/*clear zero event*/
+	TIMG6->CPU_INT.ICLR |= GPTIMER_CPU_INT_ICLR_REPC_CLR;
+	
+	/*enable zero event*/
+	TIMG6->CPU_INT.IMASK |= GPTIMER_CPU_INT_IMASK_REPC_SET;
+	
+	/*start timer*/
+	TIMG6->COUNTERREGS.CTRCTL |= GPTIMER_CTRCTL_EN_ENABLED;
+	
+	/*register interrupt*/
+	NVIC_EnableIRQ(TIMG6_INT_IRQn);
+	
+	/*enable interupts */
+	__enable_irq();
 }
 
 
@@ -89,12 +128,38 @@ void TIMG6_init(uint32_t period, uint32_t prescaler){
 void TIMG12_init(uint32_t period){
 	TIMG_power(TIMG12);
 	
+	//seelct clock source
 	TIMG12->CLKSEL = GPTIMER_CLKSEL_BUSCLK_SEL_ENABLE;
 	//slkdiv ratio
 	TIMG12->CLKDIV = 0;
 	//enable timclock
 	TIMG12->COMMONREGS.CCLKCTL = 1;
 	
+	/*config down, periodic, counter val after enable is LOAD val */
+	TIMG12->COUNTERREGS.CTRCTL &= ~(GPTIMER_CTRCTL_CVAE_MASK | GPTIMER_CTRCTL_CM_MASK | GPTIMER_CTRCTL_REPEAT_MASK);
+	TIMG12->COUNTERREGS.CTRCTL |= (GPTIMER_CTRCTL_CVAE_LDVAL | GPTIMER_CTRCTL_CM_DOWN | GPTIMER_CTRCTL_REPEAT_REPEAT_1);
+
+	/*set LOAD to period*/
+	TIMG12->COUNTERREGS.LOAD = period;
+	
+	/*setup interrupts*/
+	/*disable interrupts */
+	__disable_irq();
+	
+	/*clear zero event*/
+	TIMG12->CPU_INT.ICLR |= GPTIMER_CPU_INT_ICLR_REPC_CLR;
+	
+	/*enable zero event*/
+	TIMG12->CPU_INT.IMASK |= GPTIMER_CPU_INT_IMASK_REPC_SET;
+	
+	/*start timer*/
+	TIMG12->COUNTERREGS.CTRCTL |= GPTIMER_CTRCTL_EN_ENABLED;
+	
+	/*register interrupt*/
+	NVIC_EnableIRQ(TIMG12_INT_IRQn);
+	
+	/*enable interupts */
+	__enable_irq();
 }
 
 
