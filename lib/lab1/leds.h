@@ -42,6 +42,7 @@ void LED2_init(void);
 */
 void LED1_set();
 
+void LED1_toggle();
 
 /**
  * @brief Set LED2 output state

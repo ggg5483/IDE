@@ -190,6 +190,9 @@ void LED1_set(int state){
 		}
 }
 
+void LED1_toggle(){
+	GPIOA->DOUTTGL31_0 |= 0x01;
+}
 
 
 /**
