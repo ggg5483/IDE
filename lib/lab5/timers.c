@@ -62,10 +62,10 @@ void TIMG0_init(uint32_t period, uint32_t prescaler){
 	__disable_irq();
 	
 	/*clear zero event*/
-	TIMG0->CPU_INT.ICLR |= GPTIMER_CPU_INT_ICLR_REPC_CLR;
+	TIMG0->CPU_INT.ICLR |= GPTIMER_CPU_INT_ICLR_Z_CLR;
 	
 	/*enable zero event*/
-	TIMG0->CPU_INT.IMASK |= GPTIMER_CPU_INT_IMASK_REPC_SET;
+	TIMG0->CPU_INT.IMASK |= GPTIMER_CPU_INT_IMASK_Zs_SET;
 	
 	/*start timer*/
 	TIMG0->COUNTERREGS.CTRCTL |= GPTIMER_CTRCTL_EN_ENABLED;
