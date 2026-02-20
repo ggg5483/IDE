@@ -29,6 +29,7 @@ void ADC0_init(void){
  * @return ADC0 processed value
 */
 uint32_t ADC0_getVal(void){
+	return 0;
 }
 
 

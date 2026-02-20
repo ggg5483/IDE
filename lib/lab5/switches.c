@@ -81,6 +81,9 @@ int S2_pressed(void){
 */
 void S1_init_interrupt(void){
 
+		/*disable interrupts */
+		__disable_irq();
+	
     if ((GPIOA->GPRCM.PWREN & GPIO_PWREN_ENABLE_MASK) == 0U) {
         GPIOA->GPRCM.RSTCTL = GPIO_RSTCTL_RESETASSERT_ASSERT |
                               GPIO_RSTCTL_KEY_UNLOCK_W |
@@ -92,21 +95,29 @@ void S1_init_interrupt(void){
     /* Configure PA18 as GPIO input */
     IOMUX->SECCFG.PINCM[IOMUX_PINCM40] |= (1U | IOMUX_PINCM_PC_CONNECTED);
     IOMUX->SECCFG.PINCM[IOMUX_PINCM40] |= IOMUX_PINCM_INENA_ENABLE;
-    IOMUX->SECCFG.PINCM[IOMUX_PINCM40] |= IOMUX_PINCM_PIPU_ENABLE;   // pull-up
+    IOMUX->SECCFG.PINCM[IOMUX_PINCM40] |= IOMUX_PINCM_PIPD_ENABLE;   // pull-down
 
+		#if 0 //commented out as i don't know what this does
     /* Configure interrupt: S1 is active-high rising edge */
     GPIOA->IEV31_0  |=  (1U << 18);   // rising edge
     GPIOA->IS31_0   &= ~(1U << 18);   // edge-sensitive
     GPIOA->IBE31_0  &= ~(1U << 18);   // single-edge
+		#endif
 
     /* Clear any stale interrupt */
-    GPIOA->ICLR31_0 = (1U << 18);
+    GPIOA->CPU_INT.ICLR |= (1U << 18);
 
     /* Enable interrupt in GPIO module */
-    GPIOA->IE31_0 |= (1U << 18);
+    GPIOA->CPU_INT.IMASK |= (1U << 18);
 
+		/*Set POlairty*/
+		GPIOA->POLARITY31_16 |= GPIO_POLARITY31_16_DIO18_FALL;
+		
     /* Enable NVIC interrupt for GPIOA */
     NVIC_EnableIRQ(GPIOA_INT_IRQn);
+		
+		/*enable interupts */
+		__enable_irq();
 }
 
 
@@ -117,6 +128,9 @@ void S1_init_interrupt(void){
 */
 void S2_init_interrupt(void){
 
+		/*disable interrupts */
+		__disable_irq();
+	
     /* Power on GPIOB if needed */
     if ((GPIOB->GPRCM.PWREN & GPIO_PWREN_ENABLE_MASK) == 0U) {
         GPIOB->GPRCM.RSTCTL = GPIO_RSTCTL_RESETASSERT_ASSERT |
@@ -131,18 +145,27 @@ void S2_init_interrupt(void){
     IOMUX->SECCFG.PINCM[IOMUX_PINCM49] |= IOMUX_PINCM_INENA_ENABLE;
     IOMUX->SECCFG.PINCM[IOMUX_PINCM49] |= IOMUX_PINCM_PIPU_ENABLE;   // pull-up
 
+		#if 0 //commented out as i don't know what this does
     /* Configure interrupt: S2 is active-low ? falling edge */
     GPIOB->IEV31_0  &= ~(1U << 21);   // falling edge
     GPIOB->IS31_0   &= ~(1U << 21);   // edge-sensitive
     GPIOB->IBE31_0  &= ~(1U << 21);   // single-edge
-
+		#endif
+		
     /* Clear any stale interrupt */
-    GPIOB->ICLR31_0 = (1U << 21);
+    GPIOB->CPU_INT.ICLR = (1U << 21);
 
     /* Enable interrupt in GPIO module */
-    GPIOB->IE31_0 |= (1U << 21);
+    GPIOB->CPU_INT.IMASK |= (1U << 21);
+		
+		/*Set POlairty*/
+		GPIOB->POLARITY31_16 |= GPIO_POLARITY31_16_DIO21_FALL;
 
     /* Enable NVIC interrupt for GPIOB */
     NVIC_EnableIRQ(GPIOB_INT_IRQn);
+		
+
+		/*enable interupts */
+		__enable_irq();
 }
 	
