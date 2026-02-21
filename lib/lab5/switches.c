@@ -111,7 +111,7 @@ void S1_init_interrupt(void){
     GPIOA->CPU_INT.IMASK |= (1U << 18);
 
 		/*Set POlairty*/
-		GPIOA->POLARITY31_16 |= GPIO_POLARITY31_16_DIO18_FALL;
+		GPIOA->POLARITY31_16 |= GPIO_POLARITY31_16_DIO18_RISE;
 		
     /* Enable NVIC interrupt for GPIOA */
     NVIC_EnableIRQ(GPIOA_INT_IRQn);
@@ -159,7 +159,7 @@ void S2_init_interrupt(void){
     GPIOB->CPU_INT.IMASK |= (1U << 21);
 		
 		/*Set POlairty*/
-		GPIOB->POLARITY31_16 |= GPIO_POLARITY31_16_DIO21_FALL;
+		GPIOB->POLARITY31_16 |= GPIO_POLARITY31_16_DIO21_RISE;
 
     /* Enable NVIC interrupt for GPIOB */
     NVIC_EnableIRQ(GPIOB_INT_IRQn);

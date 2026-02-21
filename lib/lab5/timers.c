@@ -36,6 +36,8 @@ void TIMG_power(GPTIMER_Regs *TIM){
  * @note Timer G0 is in Power Domain 0. Check page 3 of the Data Sheet
 */
 void TIMG0_init(uint32_t period, uint32_t prescaler){
+	//power domain 0
+	//40 MHz bus clock
 	TIMG_power(TIMG0);
 	
 	//seelct clock source
@@ -65,7 +67,7 @@ void TIMG0_init(uint32_t period, uint32_t prescaler){
 	TIMG0->CPU_INT.ICLR |= GPTIMER_CPU_INT_ICLR_Z_CLR;
 	
 	/*enable zero event*/
-	TIMG0->CPU_INT.IMASK |= GPTIMER_CPU_INT_IMASK_Zs_SET;
+	TIMG0->CPU_INT.IMASK |= GPTIMER_CPU_INT_IMASK_Z_SET;
 	
 	/*start timer*/
 	TIMG0->COUNTERREGS.CTRCTL |= GPTIMER_CTRCTL_EN_ENABLED;
@@ -77,16 +79,22 @@ void TIMG0_init(uint32_t period, uint32_t prescaler){
 	__enable_irq();
 }
 
-
+// Use slow clock 32 kHz or bus clock 80 MHz
+#define TIMG6_FAST false
 /**
  * @brief Timer G6 module initialization. General purpose timer
 */
 void TIMG6_init(uint32_t period, uint32_t prescaler){
+	// power Domain 1 
 	TIMG_power(TIMG6);
 	
 	//seelct clock source
-	//TIMG6->CLKSEL = GPTIMER_CLKSEL_BUSCLK_SEL_ENABLE;
+	#if TIMG6_FAST
+	TIMG6->CLKSEL = GPTIMER_CLKSEL_BUSCLK_SEL_ENABLE;
+	#else
 	TIMG6->CLKSEL = GPTIMER_CLKSEL_LFCLK_SEL_ENABLE;
+	#endif // TIMG6_FAST
+	
 	//slkdiv ratio
 	TIMG6->CLKDIV = 0;
 	//precaler
@@ -121,17 +129,24 @@ void TIMG6_init(uint32_t period, uint32_t prescaler){
 	__enable_irq();
 }
 
-
+// Use slow clock 32 kHz or bus clock 80 MHz
+#define TIMG12_FAST false
+	
 /**
  * @brief Timer G12 module initialization. General purpose timer
  * @note Timer G12 has no prescaler
 */
 void TIMG12_init(uint32_t period){
+	//
 	TIMG_power(TIMG12);
 	
 	//seelct clock source
-	TIMG12->CLKSEL = GPTIMER_CLKSEL_BUSCLK_SEL_ENABLE;
-	//TIMG12->CLKSEL = GPTIMER_CLKSEL_LFCLK_SEL_ENABLE;
+	#if TIMG12_FAST
+		TIMG12->CLKSEL = GPTIMER_CLKSEL_BUSCLK_SEL_ENABLE;
+	#else
+		TIMG12->CLKSEL = GPTIMER_CLKSEL_LFCLK_SEL_ENABLE;
+	#endif
+	
 	//slkdiv ratio
 	TIMG12->CLKDIV = 0;
 	//enable timclock
