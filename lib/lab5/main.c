@@ -75,7 +75,10 @@ int main(void){
 	UART0_init();
 
 	UART0_put("\e[2J\e[H");
+	UART0_put("\e[48;5;231m\e[38;5;232m"); // background white, text dark
+	
 	UART0_put("Ready!\n\r");
+
 
 	TIMG12_init(32);
 	
@@ -92,7 +95,7 @@ int main(void){
 
 		//infinite loop debug printing
 
-		for(volatile int j = 0; j < 10000; j++){}
+		//for(volatile int j = 0; j < 10000; j++){}
 	
 		
 		if(timing==1){
@@ -106,7 +109,7 @@ int main(void){
 			LED2=0;
 			if (last_timing == 1){
 				//edge case when interrupted in the middle of printing
-				UART0_put("\e[2k");
+				UART0_put("\x1b[2K\r"); //clear line, set sursor to start of line
 			}
 			last_timing = 0;
 		}
@@ -150,7 +153,7 @@ void TIMG12_IRQHandler(void){
 	if(timing){
 	#else
 	if(timing && (ms%LED2_slow_ms==1)){
-		#endif //LED2_fast
+	#endif //LED2_fast
 		switch (LED2) {
 			case LED2_OFF:
 				LED2 = LED2_RED;
@@ -228,24 +231,29 @@ void GROUP1_IRQHandler(void){
 			/*clear interrupt*/
 			GPIOB->CPU_INT.ICLR |= (1 << 21);
 		
-			//printing is slow so we want to do as little as possible in the ISR
+			
 			#if verbose
 			UART0_put("SWITCH 2 RELEASED !!!!!!\r\n");
 			#endif // verbose
 			
-			if(timing){
+			if(timing && ms != 0){ // ms != 0 stops some buggy debouncing behaivor we have
 				uint32_t end_time = ms;
 				timing = 0;
 				//\x1B[?25h show cursor
+				UART0_put("\x1b[38;5;232m"); // color dark
 				UART0_put("\rStopping timer!\r\nYour Time was:\r\n");
+				
 				hex_to_dec(end_time, buf);
+				UART0_put("\x1b[38;5;219m"); // color pink
 				UART0_put(buf);
+				UART0_put("\x1b[38;5;232m"); // color dark
 				UART0_put(" mS\r\n\x1B[?25h");
 
 
 			} else {
 				//\x1B[?25l hide cursor
 				UART0_put("Starting timer!\r\n\x1B[?25l");
+				UART0_put("\x1b[38;5;18m"); //color blue
 				timing = 1;
 				ms = 0;
 			}
