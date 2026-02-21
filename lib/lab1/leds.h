@@ -21,6 +21,8 @@
 #define LED2_YELLOW 0x6
 #define LED2_WHITE 0x7
 
+		
+
 /**
  * @brief Initialze LED1
  * @hint You might want to check out the schematics in the MSP User Guide

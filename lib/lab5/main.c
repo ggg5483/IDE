@@ -24,31 +24,20 @@ unsigned long ms = 0;
 int timing = 0;
 char buf[11];
 
-//turn off extra printing
+//turn on extra printing
 #define verbose false
 
-	
+/*LED2_fast
+* true  : LED2 changes at 1 kHz
+* fasle : LED2 changes at 1/LED2_slow_ms kHz
+*/
+#define LED2_fast false
+#define LED2_slow_ms 100
 
 /**
- * @brief turn a hex byte into ASCII value
+* @brief turn a 32 bit unsigned number into string decimal representation
+* @param buf should be size 11 for max 32 bit number
 */
-static int hex_to_ascii(uint8_t c) {
-    if (c >= 0 && c <= 9) return '0' + c;
-    if (c >= 0xa && c <= 0xf) return 'a' - 0xa + c;
-    return -1; // Error indicator
-}
-
-void UART0_puthex(uint32_t val){
-		UART0_putchar(hex_to_ascii((val >> 28) & 0xF));
-		UART0_putchar(hex_to_ascii((val >> 24) & 0xF));
-		UART0_putchar(hex_to_ascii((val >> 20) & 0xF));
-		UART0_putchar(hex_to_ascii((val >> 16) & 0xF));
-		UART0_putchar(hex_to_ascii((val >> 12) & 0xF));
-		UART0_putchar(hex_to_ascii((val >> 8)  & 0xF));
-		UART0_putchar(hex_to_ascii((val >> 4)  & 0xF));
-		UART0_putchar(hex_to_ascii((val >> 0)  & 0xF));
-}
-
 void hex_to_dec(uint32_t val, char *buf){
 	//zero case
 	if(val == 0){
@@ -97,7 +86,7 @@ int main(void){
 
 	
 	
-
+	timing = 0;
 	int last_timing = 0;
 	for(;;){
 
@@ -111,7 +100,7 @@ int main(void){
 			hex_to_dec(ms, buf);
 			UART0_put(buf);
 			UART0_put("\r");
-			if(LED2 != 0x7) LED2++;
+			
 			last_timing = 1;
 		} else {
 			LED2=0;
@@ -156,6 +145,43 @@ void TIMG12_IRQHandler(void){
 	//with clock set to 1 kHz this should be mS
 	ms++;
 	
+	//LED2 sequence
+	#if LED2_fast
+	if(timing){
+	#else
+	if(timing && (ms%LED2_slow_ms==1)){
+		#endif //LED2_fast
+		switch (LED2) {
+			case LED2_OFF:
+				LED2 = LED2_RED;
+				break;
+			case LED2_RED:
+				LED2 = LED2_GREEN;
+				break;
+			case LED2_GREEN:
+				LED2 = LED2_BLUE;
+				break;
+			case LED2_BLUE:
+				LED2 = LED2_CYAN;
+				break;
+			case LED2_CYAN:
+				LED2 = LED2_MAGENTA;
+				break;
+			case LED2_MAGENTA:
+				LED2 = LED2_YELLOW;
+				break;
+			case LED2_YELLOW:
+				LED2 = LED2_WHITE;
+				break;
+			case LED2_WHITE:
+				break;
+			default:
+				LED2 = LED2_WHITE;
+				break;
+			
+		} // switch LED2
+		
+	} // if  timing
 }
 #endif //TIM_INTS
 
@@ -179,12 +205,12 @@ void GROUP1_IRQHandler(void){
 				case OFF:
 					LED1 = TOGGLE;
 					// enable timer
-					TIMG12->COUNTERREGS.CTRCTL |= GPTIMER_CTRCTL_EN_ENABLED;
+					TIMG6->COUNTERREGS.CTRCTL |= GPTIMER_CTRCTL_EN_ENABLED;
 					break;
 				case TOGGLE:
 					LED1 = OFF;
 					// disable timer
-					TIMG12->COUNTERREGS.CTRCTL &= ~GPTIMER_CTRCTL_EN_ENABLED;
+					TIMG6->COUNTERREGS.CTRCTL &= ~GPTIMER_CTRCTL_EN_ENABLED;
 					LED1_set(0);
 					break;
 				default:
@@ -201,6 +227,8 @@ void GROUP1_IRQHandler(void){
 			/*SW2*/
 			/*clear interrupt*/
 			GPIOB->CPU_INT.ICLR |= (1 << 21);
+		
+			//printing is slow so we want to do as little as possible in the ISR
 			#if verbose
 			UART0_put("SWITCH 2 RELEASED !!!!!!\r\n");
 			#endif // verbose

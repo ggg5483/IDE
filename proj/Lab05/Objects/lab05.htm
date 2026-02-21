@@ -3,7 +3,7 @@
 <title>Static Call Graph - [.\Objects\lab05.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\Objects\lab05.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6070001: Last Updated: Sat Feb 21 00:58:15 2026
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6070001: Last Updated: Sat Feb 21 14:48:07 2026
 <BR><P>
 <H3>Maximum Stack Usage =         56 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -301,8 +301,9 @@ Global Symbols
 
 <P><STRONG><a name="[69]"></a>__aeabi_uidiv</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, aeabi_sdiv.o(.text), UNUSED)
 
-<P><STRONG><a name="[3d]"></a>__aeabi_uidivmod</STRONG> (Thumb, 20 bytes, Stack size 0 bytes, aeabi_sdiv.o(.text))
+<P><STRONG><a name="[3c]"></a>__aeabi_uidivmod</STRONG> (Thumb, 20 bytes, Stack size 0 bytes, aeabi_sdiv.o(.text))
 <BR><BR>[Called By]<UL><LI><a href="#[3b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;hex_to_dec
+<LI><a href="#[1d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TIMG12_IRQHandler
 </UL>
 
 <P><STRONG><a name="[6a]"></a>__aeabi_idiv</STRONG> (Thumb, 0 bytes, Stack size 8 bytes, aeabi_sdiv.o(.text), UNUSED)
@@ -371,7 +372,7 @@ Global Symbols
 <LI><a href="#[c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;GROUP1_IRQHandler
 </UL>
 
-<P><STRONG><a name="[3c]"></a>LED1_toggle</STRONG> (Thumb, 16 bytes, Stack size 0 bytes, leds.o(.text.LED1_toggle))
+<P><STRONG><a name="[3d]"></a>LED1_toggle</STRONG> (Thumb, 16 bytes, Stack size 0 bytes, leds.o(.text.LED1_toggle))
 <BR><BR>[Called By]<UL><LI><a href="#[19]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TIMG6_IRQHandler
 </UL>
 
@@ -398,7 +399,11 @@ Global Symbols
 <P><STRONG><a name="[18]"></a>TIMG0_IRQHandler</STRONG> (Thumb, 2 bytes, Stack size 0 bytes, main.o(.text.TIMG0_IRQHandler))
 <BR>[Address Reference Count : 1]<UL><LI> startup_mspm0g350x_uvision.o(RESET)
 </UL>
-<P><STRONG><a name="[1d]"></a>TIMG12_IRQHandler</STRONG> (Thumb, 16 bytes, Stack size 0 bytes, main.o(.text.TIMG12_IRQHandler))
+<P><STRONG><a name="[1d]"></a>TIMG12_IRQHandler</STRONG> (Thumb, 84 bytes, Stack size 8 bytes, main.o(.text.TIMG12_IRQHandler))
+<BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = TIMG12_IRQHandler
+</UL>
+<BR>[Calls]<UL><LI><a href="#[3c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_uidivmod
+</UL>
 <BR>[Address Reference Count : 1]<UL><LI> startup_mspm0g350x_uvision.o(RESET)
 </UL>
 <P><STRONG><a name="[44]"></a>TIMG12_init</STRONG> (Thumb, 104 bytes, Stack size 8 bytes, timers.o(.text.TIMG12_init))
@@ -410,7 +415,7 @@ Global Symbols
 <P><STRONG><a name="[19]"></a>TIMG6_IRQHandler</STRONG> (Thumb, 40 bytes, Stack size 8 bytes, main.o(.text.TIMG6_IRQHandler))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = TIMG6_IRQHandler
 </UL>
-<BR>[Calls]<UL><LI><a href="#[3c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;LED1_toggle
+<BR>[Calls]<UL><LI><a href="#[3d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;LED1_toggle
 <LI><a href="#[3a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;LED1_set
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> startup_mspm0g350x_uvision.o(RESET)
@@ -438,13 +443,13 @@ Global Symbols
 <P><STRONG><a name="[3b]"></a>hex_to_dec</STRONG> (Thumb, 84 bytes, Stack size 24 bytes, main.o(.text.hex_to_dec))
 <BR><BR>[Stack]<UL><LI>Max Depth = 24<LI>Call Chain = hex_to_dec
 </UL>
-<BR>[Calls]<UL><LI><a href="#[3d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_uidivmod
+<BR>[Calls]<UL><LI><a href="#[3c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_uidivmod
 </UL>
 <BR>[Called By]<UL><LI><a href="#[2f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 <LI><a href="#[c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;GROUP1_IRQHandler
 </UL>
 
-<P><STRONG><a name="[2f]"></a>main</STRONG> (Thumb, 232 bytes, Stack size 32 bytes, main.o(.text.main))
+<P><STRONG><a name="[2f]"></a>main</STRONG> (Thumb, 216 bytes, Stack size 32 bytes, main.o(.text.main))
 <BR><BR>[Stack]<UL><LI>Max Depth = 56<LI>Call Chain = main &rArr; hex_to_dec
 </UL>
 <BR>[Calls]<UL><LI><a href="#[3b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;hex_to_dec
