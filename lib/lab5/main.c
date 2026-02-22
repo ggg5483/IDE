@@ -283,23 +283,26 @@ void GROUP1_IRQHandler(void){
 /**************************************************************************************************/
 
 #if MAIN == 2
+/**
+ * Lab 5 – Part 2: ADC + Timer + UART
+ */
 int main(void)
 {
-    /* Initialize UART0 for terminal output */
+    /* Initialize UART0 for printing */
     UART0_init();
 
-    /* Initialize ADC0 (channel 0 mapped to PA27) */
+    /* Initialize ADC0 (channel 0 ? MEMRES0) */
     ADC0_init();
 
-    /* Initialize TIMG6 for 2 Hz (period = bus_clock / 2) */
-    TIMG6_init(16384U, 0U); /* Example: prescaler 0, period 16384 -> 2 Hz */
+    /* Initialize TIMG6 for 2 Hz (0.5 second period) */
+    /* LFCLK = 32768 Hz ? period = 32768 / 2 = 16384 */
+    TIMG6_init(16384U, 0U);
 
-    /* Idle loop */
     while (1) {
-        __WFI(); // wait for interrupt (low-power idle)
+        __WFI();   /* Sleep until interrupt */
     }
-    return 0;
 }
+
 
 #endif // MAIN 2
 /**************************************************************************************************/
