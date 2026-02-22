@@ -283,9 +283,24 @@ void GROUP1_IRQHandler(void){
 /**************************************************************************************************/
 
 #if MAIN == 2
-int main(void){
-	return 0;
+int main(void)
+{
+    /* Initialize UART0 for terminal output */
+    UART0_init();
+
+    /* Initialize ADC0 (channel 0 mapped to PA27) */
+    ADC0_init();
+
+    /* Initialize TIMG6 for 2 Hz (period = bus_clock / 2) */
+    TIMG6_init(16384U, 0U); /* Example: prescaler 0, period 16384 -> 2 Hz */
+
+    /* Idle loop */
+    while (1) {
+        __WFI(); // wait for interrupt (low-power idle)
+    }
+    return 0;
 }
+
 #endif // MAIN 2
 /**************************************************************************************************/
 
