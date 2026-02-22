@@ -22,7 +22,6 @@
 #include <ti/devices/msp/msp.h>
 #include <stdint.h>
 
-#define ADC12_RESULT_MASK ADC12_PERIPHERALREGIONSVT_SVTMEM_MEMRES_DATA_MASK
 #define ADC_POLL_TIMEOUT  1000000U
 
 /**
@@ -82,18 +81,21 @@ void ADC0_init(void)
 */
 uint32_t ADC0_getVal(void)
 {
-    uint32_t timeout = ADC_POLL_TIMEOUT;
-
     /* Start conversion */
     ADC1->ULLMEM.CTL1 |= ADC12_CTL1_SC_START;
 
-    /* Wait for MEMRES0 to update */
-    while (timeout--) {
+    /* Poll until MEMRES0 contains a valid result */
+    while (1) {
         uint32_t mem = ADC1->ULLMEM.MEMRES[0];
-        if ((mem & ADC12_RESULT_MASK) != 0U || mem == 0U)
+
+        /* Valid when:
+           - masked result is non-zero, OR
+           - result is exactly zero (valid for GND) */
+        if ((mem & ADC12_PERIPHERALREGIONSVT_SVTMEM_MEMRES_DATA_MASK) != 0U || mem == 0U)
             break;
     }
 
-    return (ADC1->ULLMEM.MEMRES[0] & ADC12_RESULT_MASK);
+    return (ADC1->ULLMEM.MEMRES[0] & ADC12_PERIPHERALREGIONSVT_SVTMEM_MEMRES_DATA_MASK);
 }
+
 
