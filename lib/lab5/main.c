@@ -16,23 +16,13 @@
 #include "lab2/uart.h"
 #include "lab1/leds.h"
 
-/*global LED states*/
-enum LED1_state{TOGGLE, OFF, ON};
-enum LED1_state LED1 = OFF;
-int LED2 = 0;
-unsigned long ms = 0;
-int timing = 0;
-char buf[11];
-
-//turn on extra printing
-#define verbose false
-
-/*LED2_fast
-* true  : LED2 changes at 1 kHz
-* fasle : LED2 changes at 1/LED2_slow_ms kHz
+/*
+* MAIN 	- which main is used
+* 	1		-	Part 1 main, basic timer and LED and buttons
+* 	2		-	Part 2 main
+*		3		-	Part 3 main
 */
-#define LED2_fast false
-#define LED2_slow_ms 100
+#define MAIN (1)
 
 /**
 * @brief turn a 32 bit unsigned number into string decimal representation
@@ -62,7 +52,27 @@ void hex_to_dec(uint32_t val, char *buf){
 	}
 }
 
+/*
+* MAIN 1 - switch interrupts interfacing with timers and LEDs
+*/
+#if MAIN == 1
+/*global variables*/
+enum LED1_state{TOGGLE, OFF, ON};
+enum LED1_state LED1 = OFF;
+int LED2 = 0;
+unsigned long ms = 0;
+int timing = 0;
+char buf[11];
 
+//turn on extra printing
+#define verbose false
+
+/*LED2_fast
+* true  : LED2 changes at 1 kHz
+* fasle : LED2 changes at 1/LED2_slow_ms kHz
+*/
+#define LED2_fast false
+#define LED2_slow_ms 100
 
 int main(void){
 	S1_init_interrupt();
@@ -102,7 +112,7 @@ int main(void){
 			for(int i = 0; i < 11; i++) buf[i] = '\0';
 			hex_to_dec(ms, buf);
 			UART0_put(buf);
-			UART0_put("\r");
+			UART0_put(" mS\r");
 			
 			last_timing = 1;
 		} else {
@@ -188,7 +198,9 @@ void TIMG12_IRQHandler(void){
 }
 #endif //TIM_INTS
 
-
+/*
+* GPIO handler
+*/
 void GROUP1_IRQHandler(void){
 	/*handle interrupt*/
 	switch(GPIOA->CPU_INT.IIDX){
@@ -244,7 +256,7 @@ void GROUP1_IRQHandler(void){
 					UART0_put("\rStopping timer!\r\nYour Time was:\r\n");
 					
 					hex_to_dec(end_time, buf);
-					UART0_put("\x1b[38;5;219m"); // color pink
+					UART0_put("\x1b[38;5;208m"); // color pink
 					UART0_put(buf);
 					UART0_put("\x1b[38;5;232m"); // color dark
 					UART0_put(" mS\r\n\x1B[?25h");
@@ -267,4 +279,24 @@ void GROUP1_IRQHandler(void){
 	} //if ms
 	
 }
+#endif // MAIN 1
+/**************************************************************************************************/
+
+#if MAIN == 2
+int main(void){
+	return 0;
+}
+#endif // MAIN 2
+/**************************************************************************************************/
+
+#if MAIN == 3
+int main(void){
+	return 0;
+}
+
+void TIMG6_IRQHandler(void){
+	
+}
+
+#endif // MAIN 3
 
