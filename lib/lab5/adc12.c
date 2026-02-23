@@ -10,19 +10,9 @@
  * ******************************************************************************
 */
 
-/**
- * ******************************************************************************
- * @file    : adc12.c
- * @brief   : ADC12 module file
- * @details : ADC initialization and interaction
- * ******************************************************************************
-*/
-
 #include "adc12.h"
 #include <ti/devices/msp/msp.h>
 #include <stdint.h>
-
-#define ADC_POLL_TIMEOUT  1000000U
 
 /**
  * @brief Initialize ADC0
