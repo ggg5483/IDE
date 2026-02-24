@@ -14,6 +14,7 @@
 #include "timers.h"
 #include "switches.h"
 #include "uart_extras.h"
+#include "adc12.h"
 #include "lab2/uart.h"
 #include "lab1/leds.h"
 
@@ -293,7 +294,7 @@ int main(void)
     UART0_init();
 		
 		//TIMG0_init(0xFFFF, 0);
-		IMG6_init(16000, 0);
+		TIMG6_init(16000, 0);
 
     /* Initialize ADC0 (channel 0 ? MEMRES0) */
     ADC0_init();
@@ -315,10 +316,10 @@ void TIMG6_IRQHandler(void){
     UART0_printDec(adcVal);
     UART0_put("   ");
 
-    /* Print hex */
-    UART0_put("ADC (hex): ");
-    UART0_printHex(adcVal);
-    UART0_put("\r\n");
+//    /* Print hex */
+//    UART0_put("ADC (hex): ");
+//    UART0_printHex(adcVal);
+//    UART0_put("\r\n");
 }
 
 
