@@ -298,13 +298,27 @@ int main(void)
     /* Initialize ADC0 (channel 0 ? MEMRES0) */
     ADC0_init();
 
-    /* Initialize TIMG6 for 2 Hz (0.5 second period) */
-    /* LFCLK = 32768 Hz ? period = 32768 / 2 = 16384 */
-    TIMG6_init(16384U, 0U);
-
     while (1) {
         __WFI();   /* Sleep until interrupt */
     }
+}
+
+void TIMG6_IRQHandler(void){
+    /* Clear timer interrupt */
+    TIMG6->CPU_INT.ICLR = GPTIMER_CPU_INT_ICLR_Z_CLR;
+
+    /* Trigger ADC conversion and read value */
+    uint32_t adcVal = ADC0_getVal();
+
+    /* Print decimal */
+    UART0_put("ADC (dec): ");
+    UART0_printDec(adcVal);
+    UART0_put("   ");
+
+    /* Print hex */
+    UART0_put("ADC (hex): ");
+    UART0_printHex(adcVal);
+    UART0_put("\r\n");
 }
 
 
