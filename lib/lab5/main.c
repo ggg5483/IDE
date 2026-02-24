@@ -24,7 +24,7 @@
 * 	2		-	Part 2 main
 *		3		-	Part 3 main
 */
-#define MAIN (1)
+#define MAIN (2)
 
 /**
 * @brief turn a 32 bit unsigned number into string decimal representation
