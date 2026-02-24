@@ -4,10 +4,11 @@
   ../../source\ti/devices/msp/m0p/mspm0g350x.h \
   C:\Keil_v5\ARM\ARMCLANG\Bin\..\include\stdint.h \
   C:\Keil_v5\ARM\ARMCLANG\Bin\..\include\stdbool.h \
-  C:/Keil_v5/ARM/PACK/ARM/CMSIS/5.0.1/CMSIS/Include\core_cm0plus.h \
-  C:/Keil_v5/ARM/PACK/ARM/CMSIS/5.0.1/CMSIS/Include/cmsis_compiler.h \
-  C:/Keil_v5/ARM/PACK/ARM/CMSIS/5.0.1/CMSIS/Include/cmsis_armclang.h \
-  C:\Keil_v5\ARM\ARMCLANG\Bin\..\include\arm_compat.h \
+  C:/Keil_v5/ARM/PACK/ARM/CMSIS/5.9.0/CMSIS/Core/Include\core_cm0plus.h \
+  C:/Keil_v5/ARM/PACK/ARM/CMSIS/5.9.0/CMSIS/Core/Include/cmsis_version.h \
+  C:/Keil_v5/ARM/PACK/ARM/CMSIS/5.9.0/CMSIS/Core/Include/cmsis_compiler.h \
+  C:/Keil_v5/ARM/PACK/ARM/CMSIS/5.9.0/CMSIS/Core/Include/cmsis_armclang_ltm.h \
+  C:/Keil_v5/ARM/PACK/ARM/CMSIS/5.9.0/CMSIS/Core/Include/mpu_armv7.h \
   ../../source\ti/devices/msp/peripherals/hw_adc12.h \
   ../../source\ti/devices/msp/peripherals/hw_aes.h \
   ../../source\ti/devices/msp/peripherals/hw_comp.h \

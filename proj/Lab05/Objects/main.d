@@ -3,10 +3,11 @@
   ../../source\ti/devices/msp/m0p/mspm0g350x.h \
   C:\Keil_v5\ARM\ARMCLANG\Bin\..\include\stdint.h \
   C:\Keil_v5\ARM\ARMCLANG\Bin\..\include\stdbool.h \
-  C:/Keil_v5/ARM/PACK/ARM/CMSIS/5.0.1/CMSIS/Include\core_cm0plus.h \
-  C:/Keil_v5/ARM/PACK/ARM/CMSIS/5.0.1/CMSIS/Include/cmsis_compiler.h \
-  C:/Keil_v5/ARM/PACK/ARM/CMSIS/5.0.1/CMSIS/Include/cmsis_armclang.h \
-  C:\Keil_v5\ARM\ARMCLANG\Bin\..\include\arm_compat.h \
+  C:/Keil_v5/ARM/PACK/ARM/CMSIS/5.9.0/CMSIS/Core/Include\core_cm0plus.h \
+  C:/Keil_v5/ARM/PACK/ARM/CMSIS/5.9.0/CMSIS/Core/Include/cmsis_version.h \
+  C:/Keil_v5/ARM/PACK/ARM/CMSIS/5.9.0/CMSIS/Core/Include/cmsis_compiler.h \
+  C:/Keil_v5/ARM/PACK/ARM/CMSIS/5.9.0/CMSIS/Core/Include/cmsis_armclang_ltm.h \
+  C:/Keil_v5/ARM/PACK/ARM/CMSIS/5.9.0/CMSIS/Core/Include/mpu_armv7.h \
   ../../source\ti/devices/msp/peripherals/hw_adc12.h \
   ../../source\ti/devices/msp/peripherals/hw_aes.h \
   ../../source\ti/devices/msp/peripherals/hw_comp.h \
@@ -34,4 +35,5 @@
   ../../source\ti/devices/msp/peripherals/m0p/hw_sysctl.h \
   ../../source\ti/devices/msp/peripherals/m0p/sysctl/hw_sysctl_mspm0g1x0x_g3x0x.h \
   ../../lib/lab5/timers.h ../../lib/lab5/switches.h \
-  ../../lib\lab2/uart.h ../../lib\lab1/leds.h
+  ../../lib\uart_extras.h ../../lib/lab5/adc12.h ../../lib\lab2/uart.h \
+  ../../lib\lab1/leds.h
