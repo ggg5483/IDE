@@ -314,7 +314,7 @@ void TIMG6_IRQHandler(void){
     /* Print decimal */
     UART0_put("ADC (dec): ");
     UART0_printDec(adcVal);
-    UART0_put("   ");
+    UART0_put("   \r\n");
 
 //    /* Print hex */
 //    UART0_put("ADC (hex): ");

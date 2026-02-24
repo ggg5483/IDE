@@ -455,6 +455,11 @@
               <FileType>5</FileType>
               <FilePath>..\..\lib\lab2\uart.h</FilePath>
             </File>
+            <File>
+              <FileName>uart_extras.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\lib\uart_extras.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
