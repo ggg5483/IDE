@@ -13,6 +13,7 @@
 #include <ti/devices/msp/msp.h>
 #include "timers.h"
 #include "switches.h"
+#include "uart_extras.h"
 #include "lab2/uart.h"
 #include "lab1/leds.h"
 
@@ -288,6 +289,16 @@ void GROUP1_IRQHandler(void){
  */
 int main(void)
 {
+	//TIMG0_init(0xFFFF, 0);
+	TIMG6_init(16000, 0);
+	
+	UART0_init();
+
+	UART0_put("\e[2J\e[H");
+	UART0_put("\e[48;5;231m\e[38;5;232m"); // background white, text dark
+	
+	UART0_put("Ready!\n\r");
+
     /* Initialize UART0 for printing */
     UART0_init();
 
