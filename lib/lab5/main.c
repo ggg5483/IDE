@@ -26,6 +26,13 @@
 */
 #define MAIN (2)
 
+/*
+* COMP 	- which hardware is being used in Part 2 ADC
+* 	1		-	Part 1, Photocell output
+* 	2		-	Part 2, TMP36 temperature sensor output
+*/
+#define COMP (2)
+
 /**
 * @brief turn a 32 bit unsigned number into string decimal representation
 * @param buf should be size 11 for max 32 bit number
@@ -311,15 +318,47 @@ void TIMG6_IRQHandler(void){
     /* Trigger ADC conversion and read value */
     uint32_t adcVal = ADC0_getVal();
 
+/* Photocell output (1) */
+#if COMP == 1
     /* Print decimal */
     UART0_put("ADC (dec): ");
     UART0_printDec(adcVal);
     UART0_put("   \r\n");
 
-//    /* Print hex */
-//    UART0_put("ADC (hex): ");
-//    UART0_printHex(adcVal);
-//    UART0_put("\r\n");
+    /* Print hex */
+    UART0_put("ADC (hex): 0x");
+
+    const char hexDigits[] = "0123456789ABCDEF";
+		
+		/* 12 bit to hex val conversion */
+    UART0_putchar(hexDigits[(adcVal >> 8) & 0xF]);
+    UART0_putchar(hexDigits[(adcVal >> 4) & 0xF]);
+    UART0_putchar(hexDigits[(adcVal >> 0) & 0xF]);
+
+    UART0_put("   \r\n");
+		#endif // COMP 1
+	
+/* TMP36 temperature sensor output (2) */	
+#if COMP == 2		
+    /* Convert ADC ? millivolts */
+    double voltage_mV = ((double)adcVal * 3300.0) / 4095.0;
+
+    /* TMP36: Convert mV ? °C */
+    double tempC = (voltage_mV - 500.0) / 10.0;
+
+    /* Convert °C ? °F */
+    double tempF = (tempC * 9.0 / 5.0) + 32.0;
+
+		/* Print C */
+    UART0_put("ADC (C) = ");
+    UART0_printFloat(tempC);
+		UART0_put("\r\n");
+
+    /* Print F */
+    UART0_put("ADC (F) = ");
+    UART0_printFloat(tempF);
+    UART0_put("\r\n");
+		#endif // COMP 2
 }
 
 
