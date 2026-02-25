@@ -340,13 +340,13 @@ void TIMG6_IRQHandler(void){
 	
 /* TMP36 temperature sensor output (2) */	
 #if COMP == 2		
-    /* Convert ADC ? millivolts */
+    /* Convert ADC to millivolts */
     double voltage_mV = ((double)adcVal * 3300.0) / 4095.0;
 
-    /* TMP36: Convert mV ? °C */
+    /* TMP36: Convert mV to °C */
     double tempC = (voltage_mV - 500.0) / 10.0;
 
-    /* Convert °C ? °F */
+    /* Convert °C to °F */
     double tempF = (tempC * 9.0 / 5.0) + 32.0;
 
 		/* Print C */
