@@ -31,7 +31,7 @@
 * 	1		-	Part 1, Photocell output
 * 	2		-	Part 2, TMP36 temperature sensor output
 */
-#define COMP (2)
+#define COMP (1)
 
 /**
 * @brief turn a 32 bit unsigned number into string decimal representation
