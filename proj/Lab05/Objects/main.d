@@ -1,39 +1,41 @@
-./objects/main.o: ../../lib/lab5/main.c ../../source\ti/devices/msp/msp.h \
-  ../../source\ti/devices/DeviceFamily.h \
-  ../../source\ti/devices/msp/m0p/mspm0g350x.h \
+./objects/main.o: ..\..\lib\lab5\main.c ..\..\source\ti\devices\msp\msp.h \
+  ..\..\source\ti\devices\DeviceFamily.h \
+  ..\..\source\ti\devices\msp\m0p\mspm0g350x.h \
   C:\Keil_v5\ARM\ARMCLANG\Bin\..\include\stdint.h \
   C:\Keil_v5\ARM\ARMCLANG\Bin\..\include\stdbool.h \
-  C:/Keil_v5/ARM/PACK/ARM/CMSIS/5.9.0/CMSIS/Core/Include\core_cm0plus.h \
-  C:/Keil_v5/ARM/PACK/ARM/CMSIS/5.9.0/CMSIS/Core/Include/cmsis_version.h \
-  C:/Keil_v5/ARM/PACK/ARM/CMSIS/5.9.0/CMSIS/Core/Include/cmsis_compiler.h \
-  C:/Keil_v5/ARM/PACK/ARM/CMSIS/5.9.0/CMSIS/Core/Include/cmsis_armclang_ltm.h \
-  C:/Keil_v5/ARM/PACK/ARM/CMSIS/5.9.0/CMSIS/Core/Include/mpu_armv7.h \
-  ../../source\ti/devices/msp/peripherals/hw_adc12.h \
-  ../../source\ti/devices/msp/peripherals/hw_aes.h \
-  ../../source\ti/devices/msp/peripherals/hw_comp.h \
-  ../../source\ti/devices/msp/peripherals/hw_crc.h \
-  ../../source\ti/devices/msp/peripherals/hw_dac12.h \
-  ../../source\ti/devices/msp/peripherals/hw_dma.h \
-  ../../source\ti/devices/msp/peripherals/hw_flashctl.h \
-  ../../source\ti/devices/msp/peripherals/hw_gpio.h \
-  ../../source\ti/devices/msp/peripherals/hw_gptimer.h \
-  ../../source\ti/devices/msp/peripherals/hw_i2c.h \
-  ../../source\ti/devices/msp/peripherals/hw_iomux.h \
-  ../../source\ti/devices/msp/peripherals/hw_mathacl.h \
-  ../../source\ti/devices/msp/peripherals/hw_mcan.h \
-  ../../source\ti/devices/msp/peripherals/hw_oa.h \
-  ../../source\ti/devices/msp/peripherals/hw_rtc.h \
-  ../../source\ti/devices/msp/peripherals/hw_spi.h \
-  ../../source\ti/devices/msp/peripherals/hw_trng.h \
-  ../../source\ti/devices/msp/peripherals/hw_uart.h \
-  ../../source\ti/devices/msp/peripherals/hw_vref.h \
-  ../../source\ti/devices/msp/peripherals/hw_wuc.h \
-  ../../source\ti/devices/msp/peripherals/hw_wwdt.h \
-  ../../source\ti/devices/msp/peripherals/m0p/hw_factoryregion.h \
-  ../../source\ti/devices/msp/peripherals/m0p/hw_cpuss.h \
-  ../../source\ti/devices/msp/peripherals/m0p/hw_debugss.h \
-  ../../source\ti/devices/msp/peripherals/m0p/hw_sysctl.h \
-  ../../source\ti/devices/msp/peripherals/m0p/sysctl/hw_sysctl_mspm0g1x0x_g3x0x.h \
-  ../../lib/lab5/timers.h ../../lib/lab5/switches.h \
-  ../../lib\uart_extras.h ../../lib/lab5/adc12.h ../../lib\lab2/uart.h \
-  ../../lib\lab1/leds.h
+  C:\Users\alexx\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include\core_cm0plus.h \
+  C:\Users\alexx\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include\cmsis_version.h \
+  C:\Users\alexx\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include\cmsis_compiler.h \
+  C:\Users\alexx\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include\cmsis_armclang.h \
+  C:\Keil_v5\ARM\ARMCLANG\Bin\..\include\arm_compat.h \
+  C:\Keil_v5\ARM\ARMCLANG\Bin\..\include\arm_acle.h \
+  C:\Users\alexx\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include\mpu_armv7.h \
+  ..\..\source\ti\devices\msp\peripherals\hw_adc12.h \
+  ..\..\source\ti\devices\msp\peripherals\hw_aes.h \
+  ..\..\source\ti\devices\msp\peripherals\hw_comp.h \
+  ..\..\source\ti\devices\msp\peripherals\hw_crc.h \
+  ..\..\source\ti\devices\msp\peripherals\hw_dac12.h \
+  ..\..\source\ti\devices\msp\peripherals\hw_dma.h \
+  ..\..\source\ti\devices\msp\peripherals\hw_flashctl.h \
+  ..\..\source\ti\devices\msp\peripherals\hw_gpio.h \
+  ..\..\source\ti\devices\msp\peripherals\hw_gptimer.h \
+  ..\..\source\ti\devices\msp\peripherals\hw_i2c.h \
+  ..\..\source\ti\devices\msp\peripherals\hw_iomux.h \
+  ..\..\source\ti\devices\msp\peripherals\hw_mathacl.h \
+  ..\..\source\ti\devices\msp\peripherals\hw_mcan.h \
+  ..\..\source\ti\devices\msp\peripherals\hw_oa.h \
+  ..\..\source\ti\devices\msp\peripherals\hw_rtc.h \
+  ..\..\source\ti\devices\msp\peripherals\hw_spi.h \
+  ..\..\source\ti\devices\msp\peripherals\hw_trng.h \
+  ..\..\source\ti\devices\msp\peripherals\hw_uart.h \
+  ..\..\source\ti\devices\msp\peripherals\hw_vref.h \
+  ..\..\source\ti\devices\msp\peripherals\hw_wuc.h \
+  ..\..\source\ti\devices\msp\peripherals\hw_wwdt.h \
+  ..\..\source\ti\devices\msp\peripherals\m0p\hw_factoryregion.h \
+  ..\..\source\ti\devices\msp\peripherals\m0p\hw_cpuss.h \
+  ..\..\source\ti\devices\msp\peripherals\m0p\hw_debugss.h \
+  ..\..\source\ti\devices\msp\peripherals\m0p\hw_sysctl.h \
+  ..\..\source\ti\devices\msp\peripherals\m0p\sysctl\hw_sysctl_mspm0g1x0x_g3x0x.h \
+  ..\..\lib\lab5\timers.h ..\..\lib\lab5\switches.h \
+  ..\..\lib\uart_extras.h ..\..\lib\lab5\adc12.h ..\..\lib\lab2\uart.h \
+  ..\..\lib\lab1\leds.h ..\..\lib\lab5\camera.h

@@ -16,6 +16,10 @@
 
 #include <stdint.h>
 
+/* SI = PA28, CLK = PA12 */
+#define CAM_SI_MASK   (1UL << 28)
+#define CAM_CLK_MASK  (1UL << 12)
+
 /**
  * @brief Initialize camera associated components
 */
@@ -36,5 +40,16 @@ uint8_t Camera_isDataReady(void);
 */
 uint16_t* Camera_getData(void);
 
+/**
+ * @brief Checks whether camera data is ready to retrieve
+ * @return True(1)/False(0)
+*/
+uint8_t Camera_isDataReady(void);
+
+/**
+ * @brief Retrieves pointer to camera data array
+ * @return Pointer to global data array
+*/
+uint16_t* Camera_getData(void);
 
 #endif // _CAMERA_H_

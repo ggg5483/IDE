@@ -17,6 +17,7 @@
 #include "adc12.h"
 #include "lab2/uart.h"
 #include "lab1/leds.h"
+#include "camera.h"
 
 /*
 * MAIN 	- which main is used
@@ -24,7 +25,7 @@
 * 	2		-	Part 2 main, Analog to Digital Converter
 *		3		-	Part 3 main, DE Car Camera
 */
-#define MAIN (2)
+#define MAIN (3)
 
 /*
 * COMP 	- which hardware is being used in Part 2 ADC
@@ -305,6 +306,9 @@ int main(void)
 
     /* Initialize ADC0 (channel 0 ? MEMRES0) */
     ADC0_init();
+	
+	  UART0_put("\e[2J\e[H");
+	  UART0_put("\e[48;5;231m\e[38;5;232m"); // background white, text dark
 
     while (1) {
         __WFI();   /* Sleep until interrupt */
@@ -366,6 +370,11 @@ void TIMG6_IRQHandler(void){
 /**************************************************************************************************/
 
 #if MAIN == 3
+/* Local camera data */
+static volatile uint16_t cameraData[128];
+static volatile uint16_t pixelCounter = 0;
+static volatile uint8_t  cameraData_complete = 0;
+
 int main(void)
 {
     UART0_init();
@@ -384,10 +393,69 @@ int main(void)
             }
             UART0_put("-2\r\n");
         }
-        __WFI();
     }
 }
 
+/**
+ * @brief TIMG6 ISR – controls SI pulse and integration time
+*/
+void TIMG6_IRQHandler(void)
+{
+    /* Clear interrupt */
+    //TIMG6->CPU_INT.ICLR = GPTIMER_CPU_INT_ICLR_Z_CLR;
+
+    /* Ensure CLK disabled */
+    TIMG0->COUNTERREGS.CTRCTL &= ~GPTIMER_CTRCTL_EN_ENABLED;
+
+    /* Do not start new frame if previous not completed */
+    if (cameraData_complete)
+        return;
+
+    pixelCounter = 0U;
+
+    /* Start capture sequence */
+    GPIOA->DOUTCLR31_0 = CAM_CLK_MASK;
+    GPIOA->DOUTSET31_0 = CAM_SI_MASK;
+
+    GPIOA->DOUTSET31_0 = CAM_CLK_MASK;
+    GPIOA->DOUTCLR31_0 = CAM_CLK_MASK;
+
+    GPIOA->DOUTCLR31_0 = CAM_SI_MASK;
+
+    /* Enable CLK timer */
+    TIMG0->COUNTERREGS.CTRCTL |= GPTIMER_CTRCTL_EN_ENABLED;
+}
+
+
+/**
+ * @brief TIMG0 ISR – drives CLK and samples ADC
+*/
+void TIMG0_IRQHandler(void)
+{
+    /* Clear interrupt */
+    //TIMG0->CPU_INT.ICLR = GPTIMER_CPU_INT_ICLR_Z_CLR;
+
+    /* Pulse CLK */
+    GPIOA->DOUTSET31_0 = CAM_CLK_MASK;
+
+    /* Sample ADC */
+    uint32_t adcVal = ADC0_getVal();
+
+    if (pixelCounter < 128U) {
+        cameraData[pixelCounter++] = (uint16_t)adcVal;
+    }
+
+    GPIOA->DOUTCLR31_0 = CAM_CLK_MASK;
+
+    /* End of frame */
+    if (pixelCounter >= 128U) {
+        cameraData_complete = 1U;
+        pixelCounter = 0U;
+
+        /* Disable CLK */
+        TIMG0->COUNTERREGS.CTRCTL &= ~GPTIMER_CTRCTL_EN_ENABLED;
+    }
+}
 
 #endif // MAIN 3
 
