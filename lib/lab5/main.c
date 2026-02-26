@@ -21,8 +21,8 @@
 /*
 * MAIN 	- which main is used
 * 	1		-	Part 1 main, basic timer and LED and buttons
-* 	2		-	Part 2 main
-*		3		-	Part 3 main
+* 	2		-	Part 2 main, Analog to Digital Converter
+*		3		-	Part 3 main, DE Car Camera
 */
 #define MAIN (2)
 
@@ -366,13 +366,28 @@ void TIMG6_IRQHandler(void){
 /**************************************************************************************************/
 
 #if MAIN == 3
-int main(void){
-	return 0;
+int main(void)
+{
+    UART0_init();
+    Camera_init();
+    UART0_put("\e[2J\e[H");
+    UART0_put("Camera ready\r\n");
+    while (1) {
+
+        if (Camera_isDataReady()) {
+            uint16_t *data = Camera_getData();
+            UART0_put("-1\r\n");
+
+            for (int i = 0; i < 128; i++) {
+                UART0_printDec(data[i]);
+                UART0_put("\r\n");
+            }
+            UART0_put("-2\r\n");
+        }
+        __WFI();
+    }
 }
 
-void TIMG6_IRQHandler(void){
-	
-}
 
 #endif // MAIN 3
 
