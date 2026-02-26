@@ -53,7 +53,7 @@ void Camera_init(void)
     /* Disable CLK timer initially */
     TIMG0->COUNTERREGS.CTRCTL &= ~GPTIMER_CTRCTL_EN_ENABLED;
 
-    /* TIMG6: integration time */
+    /* TIMG6: integration time ~7.5ms */
     TIMG6_init(239U, 0U);
 
     cameraData_complete = 0U;
@@ -90,7 +90,7 @@ void TIMG6_IRQHandler(void)
     /* Ensure CLK disabled */
     TIMG0->COUNTERREGS.CTRCTL &= ~GPTIMER_CTRCTL_EN_ENABLED;
 
-    /* Do not start new frame if previous not consumed */
+    /* Do not start new frame if previous not completed */
     if (cameraData_complete)
         return;
 
