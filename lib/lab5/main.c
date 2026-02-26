@@ -94,7 +94,7 @@ int main(void){
 	LED2_init();
 	UART0_init();
 
-	UART0_put("\e[2J\e[H");
+	UART0_put("\e[2J\e[H");									//CLEAR screen
 	UART0_put("\e[48;5;231m\e[38;5;232m"); // background white, text dark
 	
 	UART0_put("Ready!\n\r");
@@ -379,8 +379,10 @@ int main(void)
 {
     UART0_init();
     Camera_init();
-    UART0_put("\e[2J\e[H");
-    UART0_put("Camera ready\r\n");
+    
+		UART0_put("\e[48;5;231m\e[38;5;232m"); // background white, text dark
+		UART0_put("\e[2J\e[H"); // clear screen
+		UART0_put("Camera ready\r\n");
     while (1) {
 
         if (Camera_isDataReady()) {
