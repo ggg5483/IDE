@@ -379,14 +379,17 @@ int main(void)
 {
     UART0_init();
     Camera_init();
+	
+
     
 		UART0_put("\e[48;5;231m\e[38;5;232m"); // background white, text dark
 		UART0_put("\e[2J\e[H"); // clear screen
 		UART0_put("Camera ready\r\n");
     while (1) {
-
-        if (Camera_isDataReady()) {
-            uint16_t *data = Camera_getData();
+				
+				
+        if (cameraData_complete) {
+            volatile uint16_t *data = cameraData;
             UART0_put("-1\r\n");
 
             for (int i = 0; i < 128; i++) {
@@ -394,6 +397,11 @@ int main(void)
                 UART0_put("\r\n");
             }
             UART0_put("-2\r\n");
+						UART0_put("\e[2J\e[H"); // clear screen
+						
+						cameraData_complete = 0;
+						
+						
         }
     }
 }
@@ -437,6 +445,7 @@ void TIMG0_IRQHandler(void)
     /* Clear interrupt */
     //TIMG0->CPU_INT.ICLR = GPTIMER_CPU_INT_ICLR_Z_CLR;
 
+		#if 1
     /* Pulse CLK */
     GPIOA->DOUTSET31_0 = CAM_CLK_MASK;
 
@@ -457,6 +466,10 @@ void TIMG0_IRQHandler(void)
         /* Disable CLK */
         TIMG0->COUNTERREGS.CTRCTL &= ~GPTIMER_CTRCTL_EN_ENABLED;
     }
+		#else
+		GPIOA->DOUTTGL31_0 = CAM_CLK_MASK;
+		GPIOA->DOUTTGL31_0 = CAM_SI_MASK;
+		#endif
 }
 
 #endif // MAIN 3

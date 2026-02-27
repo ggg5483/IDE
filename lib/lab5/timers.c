@@ -53,7 +53,7 @@ void TIMG0_init(uint32_t period, uint32_t prescaler){
 	
 	
 	/*config down, periodic, counter val after enable is LOAD val */
-	TIMG0->COUNTERREGS.CTRCTL &= ~(GPTIMER_CTRCTL_CVAE_MASK | GPTIMER_CTRCTL_CM_MASK | GPTIMER_CTRCTL_REPEAT_MASK);
+	//TIMG0->COUNTERREGS.CTRCTL &= ~(GPTIMER_CTRCTL_CVAE_MASK | GPTIMER_CTRCTL_CM_MASK | GPTIMER_CTRCTL_REPEAT_MASK);
 	TIMG0->COUNTERREGS.CTRCTL = (GPTIMER_CTRCTL_CVAE_LDVAL | GPTIMER_CTRCTL_CM_DOWN | GPTIMER_CTRCTL_REPEAT_REPEAT_1);
 
 	/*set LOAD to period*/
@@ -64,7 +64,7 @@ void TIMG0_init(uint32_t period, uint32_t prescaler){
 	__disable_irq();
 	
 	/*clear zero event*/
-	TIMG0->CPU_INT.ICLR |= GPTIMER_CPU_INT_ICLR_Z_CLR;
+	TIMG0->CPU_INT.ICLR |= GPTIMER_CPU_INT_ICLR_Z_MASK;
 	
 	/*enable zero event*/
 	TIMG0->CPU_INT.IMASK |= GPTIMER_CPU_INT_IMASK_Z_SET;
