@@ -1,3 +1,2 @@
-#proj/Lab*/Listings/*
-/proj/Lab*/Objects
-#proj/Lab*/RTE/*
+/proj/Lab*/Objects/*.o
+/proj/Lab*/Objects/*.d
