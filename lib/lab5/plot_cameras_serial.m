@@ -50,37 +50,41 @@ end % plot_cameras_serial
 %*****************************************************************************************************************
 function trace = readData(trace)
     % Initialize Serial Object
-    serialPort = "COM9";
+    persistent camera
+    serialPort = "COM6";
     serialBaudrate = 9600;
-    camera = serialport(serialPort, serialBaudrate);
-    camera.FlowControl = "software";
-    camera.configureTerminator("CR/LF");
+
+    if isempty(camera) || ~isvalid(camera)
+        camera = serialport(serialPort, serialBaudrate);
+        camera.FlowControl = "software";
+        camera.configureTerminator("CR/LF");
+    end
+
     count = 1;
 
     % Read data from serial object for trace
     while(true)
         % disp("Searching for start..");
-        val = readline(camera);
+        val = strtrim(readline(camera));
         if (strcmp(val, "-1") == 0) % if not the start
             % disp(val); % words, not numbers
             continue;
         end
         % disp("FOUND START!");
         while (true)
-            val = str2double(readline(camera));
-            % disp(val);
-            if (val == -2)
+            val = strtrim(readline(camera));
+            if strcmp(val, "-2")
                 break;
             else
-                trace(count) = val;
-                count = count + 1;
+                num = str2double(val);
+                if ~isnan(num) && count <= 128
+                    trace(count) = num;
+                    count = count + 1;
+                end
             end
         end
         break; % hit from val=-2
     end
-
-    % Clean up the serial object
-    clear camera;
 end
 
 % TODO: Complete the functions below
@@ -89,11 +93,29 @@ function data = smoothData(data)
     % TODO: 5-point Averager
     %   For loop or movmean()
 
+    sm = data;
+    for i = 3:126
+        sm(i) = mean(data(i-2:i+2));
+    end
+    data = sm;
+
 end
 
 function data = edgeData(data)
     for i = 1:128
         % TODO: Edge detection (binary 0 or 1)
+
+        if i == 1
+            deriv = 0;
+        else
+            deriv = data(i) - data(i-1);
+        end
+
+        if data(i) > 1500
+            data(i) = 1;
+        else
+            data(i) = 0;
+        end
 
     end
 end
@@ -101,6 +123,15 @@ end
 function plotdata(trace, smoothtrace, bintrace, plt, ax1, ax2, ax3)
     % TODO: Plot data
     %   plot(ax, trace)
+
+    plot(ax1, trace, 'b');
+    ylim(ax1, [0 4095]);
+
+    plot(ax2, smoothtrace, 'r');
+    ylim(ax2, [0 4095]);
+
+    stem(ax3, bintrace, 'k', 'Marker', 'none');
+    ylim(ax3, [-0.2 1.2]);
 
     refreshdata
     drawnow
