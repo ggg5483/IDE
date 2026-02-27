@@ -51,7 +51,7 @@ end % plot_cameras_serial
 function trace = readData(trace)
     % Initialize Serial Object
     persistent camera
-    serialPort = "COM9";
+    serialPort = "COM6";
     serialBaudrate = 9600;
 
     if isempty(camera) || ~isvalid(camera)

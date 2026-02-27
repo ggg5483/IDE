@@ -397,7 +397,7 @@ int main(void)
                 UART0_put("\r\n");
             }
             UART0_put("-2\r\n");
-						UART0_put("\e[2J\e[H"); // clear screen
+						//UART0_put("\e[2J\e[H"); // clear screen
 						
 						cameraData_complete = 0;
 						
@@ -417,10 +417,9 @@ void TIMG6_IRQHandler(void)
     /* Ensure CLK disabled */
     TIMG0->COUNTERREGS.CTRCTL &= ~GPTIMER_CTRCTL_EN_ENABLED;
 
-    /* Do not start new frame if previous not completed */
-    if (cameraData_complete)
-        return;
-
+    /* start new frame*/
+		cameraData_complete = 0;
+	
     pixelCounter = 0U;
 
     /* Start capture sequence */
