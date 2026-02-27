@@ -111,7 +111,7 @@ function data = edgeData(data)
             deriv = data(i) - data(i-1);
         end
 
-        if deriv > max(data)*0.15
+        if data(i) > 1500
             data(i) = 1;
         else
             data(i) = 0;
