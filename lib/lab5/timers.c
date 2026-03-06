@@ -3,8 +3,9 @@
  * @file    : timers.c
  * @brief   : Timers module header file
  * @details : Timers initialization and interaction
- * 
- * @author 
+ *
+ * @author Alexander Hamadeh
+ * @author Garrett Geyer
  * @date 
  * ******************************************************************************
 */

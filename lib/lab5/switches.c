@@ -4,7 +4,8 @@
  * @brief   : Switches module header file
  * @details : Switches initialization and interaction
  * 
- * @author 
+ * @author Alexander Hamadeh
+ * @author Garrett Geyer
  * @date 
  * ******************************************************************************
 */

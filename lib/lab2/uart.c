@@ -4,6 +4,7 @@
  * @brief   : UART module file
  * @details : UART initialization and interaction
  * 
+ * @author Alexander Hamadeh
  * @author Garrett Geyer
  * @date 1/23/26
  * ******************************************************************************

@@ -4,8 +4,9 @@
  * @brief   : ADC module header file
  * @details : ADC initialization and interaction
  * @note    : ADC does not require IOMUX interaction
- * 
- * @author 
+ *
+ * @author Alexander Hamadeh
+ * @author Garrett Geyer
  * @date 
  * ******************************************************************************
 */

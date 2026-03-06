@@ -4,7 +4,7 @@
  * @brief   : 
  * @details : 
  * 
- * @author Alex Hamadeh
+ * @author Alexander Hamadeh
  * @author Garrett Geyer
  * @date 2/17/2026
  * ******************************************************************************

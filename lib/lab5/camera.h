@@ -6,7 +6,8 @@
  * @note    : Reserves the use of Timers G0 (CLK) and G6 (SI)
  *            and ADC0 channel 0 
  *
- * @author 
+ * @author Alexander Hamadeh
+ * @author Garrett Geyer
  * @date 
  * ******************************************************************************
 */
