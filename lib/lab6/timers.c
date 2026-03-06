@@ -194,6 +194,44 @@ void TIMG12_init(uint32_t period){
 void TIMA0_PWM_init(uint8_t pin, uint32_t period, uint32_t prescaler, double percentDutyCycle){
 	TIMG_power(TIMA0);
 	
+	//seelct clock source
+	TIMA0->CLKSEL = GPTIMER_CLKSEL_BUSCLK_SEL_ENABLE;
+	//TIMA0->CLKSEL = GPTIMER_CLKSEL_LFCLK_SEL_ENABLE;
+	
+	//slkdiv ratio
+	TIMA0->CLKDIV = 0;
+	//enable timclock
+	TIMA0->COMMONREGS.CCLKCTL = 1;
+	
+	/*config down, periodic, counter val after enable is LOAD val */
+	//TIMA0->COUNTERREGS.CTRCTL &= ~(GPTIMER_CTRCTL_CVAE_MASK | GPTIMER_CTRCTL_CM_MASK | GPTIMER_CTRCTL_REPEAT_MASK);
+	TIMA0->COUNTERREGS.CTRCTL = (GPTIMER_CTRCTL_CVAE_LDVAL | GPTIMER_CTRCTL_CM_DOWN | GPTIMER_CTRCTL_REPEAT_REPEAT_1);
+
+	/*set LOAD to period*/
+	TIMA0->COUNTERREGS.LOAD = period;
+	
+	/*select channel */
+	//TIMA0->FPUB_0 = 1 + pin;
+	
+	/*set CCP direction*/
+	TIMA0->COMMONREGS.CCPD = 0x7;
+	
+	/*set IO */
+	IOMUX->SECCFG.PINCM[IOMUX_PINCM25] = IOMUX_PINCM25_PF_TIMA0_CCP0 | IOMUX_PINCM_PC_CONNECTED;
+	
+	/*set CCCTL reg*/
+	TIMA0->COUNTERREGS.CCCTL_01[pin] = 0;
+	
+	/*set CCP output settings */
+	TIMA0->COUNTERREGS.CCACT_01[pin] = GPTIMER_CCACT_01_LACT_CCP_HIGH | GPTIMER_CCACT_01_CDACT_CCP_LOW;
+	
+	/* set duty cycle */
+	TIMA0_PWM_DutyCycle(pin, percentDutyCycle);
+	
+	/*start timer*/
+	TIMA0->COUNTERREGS.CTRCTL |= GPTIMER_CTRCTL_EN_ENABLED;
+	
+	
 }
 
 
@@ -208,6 +246,24 @@ void TIMA0_PWM_init(uint8_t pin, uint32_t period, uint32_t prescaler, double per
 void TIMA1_PWM_init(uint8_t pin, uint32_t period, uint32_t prescaler, double percentDutyCycle){
 	TIMG_power(TIMA1);
 	
+	//seelct clock source
+	TIMA1->CLKSEL = GPTIMER_CLKSEL_BUSCLK_SEL_ENABLE;
+
+	
+	//slkdiv ratio
+	TIMA1->CLKDIV = 0;
+	//enable timclock
+	TIMA1->COMMONREGS.CCLKCTL = 1;
+	
+	/*config down, periodic, counter val after enable is LOAD val */
+	//TIMA1->COUNTERREGS.CTRCTL &= ~(GPTIMER_CTRCTL_CVAE_MASK | GPTIMER_CTRCTL_CM_MASK | GPTIMER_CTRCTL_REPEAT_MASK);
+	TIMA1->COUNTERREGS.CTRCTL = (GPTIMER_CTRCTL_CVAE_LDVAL | GPTIMER_CTRCTL_CM_DOWN | GPTIMER_CTRCTL_REPEAT_REPEAT_1);
+
+	/*set LOAD to period*/
+	TIMA1->COUNTERREGS.LOAD = period;
+	
+	/*start timer*/
+	TIMA1->COUNTERREGS.CTRCTL |= GPTIMER_CTRCTL_EN_ENABLED;
 }
 
 
@@ -217,8 +273,8 @@ void TIMA1_PWM_init(uint8_t pin, uint32_t period, uint32_t prescaler, double per
  * @param[in] percentDutyCycle - Duty cycle to change to
 */
 void TIMA0_PWM_DutyCycle(uint8_t pin, double percentDutyCycle){
-	
-	
+	TIMA0->COUNTERREGS.CC_01[pin] = (int) ((1-percentDutyCycle) * TIMA0->COUNTERREGS.LOAD);
+	//TIMA0->COUNTERREGS.CC_01[pin] = 8000;
 }
 
 
