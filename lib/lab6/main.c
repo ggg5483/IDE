@@ -21,8 +21,14 @@ int main(void){
 	TIMA1_PWM_init(0, 3200, 0, 0.2);
 	
 	for(;;){
-		UART0_printFloat(TIMA0->COUNTERREGS.CTR);
-		UART0_put("\r\n");
+		for(int i = 0; i < 100; i++){
+			TIMA0_PWM_DutyCycle(0, (((double)i)/((double)100)));
+			for(volatile int _ = 0; _ < 100000; _++){};
+		}
+		for(int i = 0; i < 100; i++){
+			TIMA0_PWM_DutyCycle(0, (((double)(100-i))/((double)100)));
+			for(volatile int _ = 0; _ < 100000; _++){};
+		}
 	}
 	return 0;
 }
