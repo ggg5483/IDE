@@ -18,6 +18,7 @@
 int main(void){
 	UART0_init();
 	TIMA0_PWM_init(0, 3200, 0, 0.2);
+	TIMA1_PWM_init(0, 3200, 0, 0.2);
 	
 	for(;;){
 		UART0_printFloat(TIMA0->COUNTERREGS.CTR);

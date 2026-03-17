@@ -250,6 +250,10 @@ void TIMA1_PWM_init(uint8_t pin, uint32_t period, uint32_t prescaler, double per
 	TIMA1->CLKSEL = GPTIMER_CLKSEL_BUSCLK_SEL_ENABLE;
 
 	
+	//seelct clock source
+	TIMA1->CLKSEL = GPTIMER_CLKSEL_BUSCLK_SEL_ENABLE;
+	//TIMA1->CLKSEL = GPTIMER_CLKSEL_LFCLK_SEL_ENABLE;
+	
 	//slkdiv ratio
 	TIMA1->CLKDIV = 0;
 	//enable timclock
@@ -262,8 +266,28 @@ void TIMA1_PWM_init(uint8_t pin, uint32_t period, uint32_t prescaler, double per
 	/*set LOAD to period*/
 	TIMA1->COUNTERREGS.LOAD = period;
 	
+	/*select channel */
+	//TIMA1->FPUB_0 = 1 + pin;
+	
+	/*set CCP direction*/
+	TIMA1->COMMONREGS.CCPD = 0x7;
+	
+	/*set IO */
+	//PB4
+	IOMUX->SECCFG.PINCM[IOMUX_PINCM17] = IOMUX_PINCM17_PF_TIMA1_CCP0 | IOMUX_PINCM_PC_CONNECTED;
+	
+	/*set CCCTL reg*/
+	TIMA1->COUNTERREGS.CCCTL_01[pin] = 0;
+	
+	/*set CCP output settings */
+	TIMA1->COUNTERREGS.CCACT_01[pin] = GPTIMER_CCACT_01_LACT_CCP_HIGH | GPTIMER_CCACT_01_CDACT_CCP_LOW;
+	
+	/* set duty cycle */
+	TIMA1_PWM_DutyCycle(pin, percentDutyCycle);
+	
 	/*start timer*/
 	TIMA1->COUNTERREGS.CTRCTL |= GPTIMER_CTRCTL_EN_ENABLED;
+	
 }
 
 
@@ -274,7 +298,6 @@ void TIMA1_PWM_init(uint8_t pin, uint32_t period, uint32_t prescaler, double per
 */
 void TIMA0_PWM_DutyCycle(uint8_t pin, double percentDutyCycle){
 	TIMA0->COUNTERREGS.CC_01[pin] = (int) ((1-percentDutyCycle) * TIMA0->COUNTERREGS.LOAD);
-	//TIMA0->COUNTERREGS.CC_01[pin] = 8000;
 }
 
 
@@ -284,7 +307,7 @@ void TIMA0_PWM_DutyCycle(uint8_t pin, double percentDutyCycle){
  * @param[in] percentDutyCycle - Duty cycle to change to
 */
 void TIMA1_PWM_DutyCycle(uint8_t pin, double percentDutyCycle){
-	
+	TIMA1->COUNTERREGS.CC_01[pin] = (int) ((1-percentDutyCycle) * TIMA0->COUNTERREGS.LOAD);
 	
 }
 
