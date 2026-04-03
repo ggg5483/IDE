@@ -383,14 +383,49 @@
           <GroupName>Source Group 1</GroupName>
           <Files>
             <File>
-              <FileName>motor-DC.c</FileName>
+              <FileName>adc12.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Lab06\motor-DC.c</FilePath>
+              <FilePath>..\..\lib\lab5\adc12.c</FilePath>
             </File>
             <File>
-              <FileName>Main</FileName>
-              <FileType>9</FileType>
-              <FilePath>.\Main</FilePath>
+              <FileName>adc12.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\lib\lab5\adc12.h</FilePath>
+            </File>
+            <File>
+              <FileName>timers.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\lib\lab5\timers.c</FilePath>
+            </File>
+            <File>
+              <FileName>timers.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\lib\lab5\timers.h</FilePath>
+            </File>
+            <File>
+              <FileName>main.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\lib\lab5\main.c</FilePath>
+            </File>
+            <File>
+              <FileName>uart.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\lib\lab2\uart.c</FilePath>
+            </File>
+            <File>
+              <FileName>uart.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\lib\lab2\uart.h</FilePath>
+            </File>
+            <File>
+              <FileName>uart_extras.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\lib\uart_extras.c</FilePath>
+            </File>
+            <File>
+              <FileName>uart_extras.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\lib\uart_extras.h</FilePath>
             </File>
           </Files>
         </Group>
