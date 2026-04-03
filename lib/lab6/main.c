@@ -15,27 +15,6 @@
 #include "lab2/uart.h"
 #include "uart_extras.h"
 
-//int main(void){
-//	UART0_init();
-//	TIMA0_PWM_init(0, 3200, 0, 0.2);
-//	TIMA1_PWM_init(0, 3200, 0, 0.2);
-//	
-//	for(;;){
-//		for(int i = 0; i < 100; i++){
-//			TIMA0_PWM_DutyCycle(0, (((double)i)/((double)100)));
-//			for(volatile int _ = 0; _ < 100000; _++){};
-//		}
-//		for(int i = 0; i < 100; i++){
-//			TIMA0_PWM_DutyCycle(0, (((double)(100-i))/((double)100)));
-//			for(volatile int _ = 0; _ < 100000; _++){};
-//		}
-//	}
-//	return 0;
-//}
-	
-	
-	
-
 static void delay_10ms(void){
     for(volatile int i = 0; i < 100000; i++){}
 }
@@ -139,52 +118,14 @@ double servo_angle_to_duty(int angle){
 //---------------------------------------------------------------------------------//
 
 ////PART 3 SERVO SWEEP (0, 90, 180)
-//int main(void){
-//    UART0_init();
-
-//    TIMA1_PWM_init(0, 640, 0, 0.0);
-
-//    for(;;){
-
-//        // Move to 0°
-//        TIMA1_PWM_DutyCycle(0, servo_angle_to_duty(0));
-//        for(int i = 0; i < 100; i++) delay_10ms();   // hold position
-
-//        // Move to 90°
-//        TIMA1_PWM_DutyCycle(0, servo_angle_to_duty(90));
-//        for(int i = 0; i < 100; i++) delay_10ms();
-
-//        // Move to 180°
-//        TIMA1_PWM_DutyCycle(0, servo_angle_to_duty(180));
-//        for(int i = 0; i < 100; i++) delay_10ms();
-//    }
-
-//    return 0;
-//}
-
-//---------------------------------------------------------------------------------//
-
-////PART 4 SERVO AND DC
 int main(void){
     UART0_init();
 
-    // DC
-    // 10 kHz period = 100 µs
-    // 100 µs * 80 MHz = 8000 timer counts
-		TIMA0_PWM_init(0, 3200, 0, 0.3);// 30% duty cycle
-		TIMA0_PWM_init(1, 3200, 0, 0.3);// 30% duty cycle
-
-    // SERVO
-    // 20 ms period = 640 counts at 32 kHz
     TIMA1_PWM_init(0, 640, 0, 0.0);
 
-    // Move servo to 90°
-    double servoDuty = servo_angle_to_duty(90);
-    TIMA1_PWM_DutyCycle(0, servoDuty);
-
     for(;;){
-        // Idle loop — PWM hardware continues running
-			 // Move to 0°
+
+        // Move to 0°
         TIMA1_PWM_DutyCycle(0, servo_angle_to_duty(0));
         for(int i = 0; i < 100; i++) delay_10ms();   // hold position
 
@@ -195,59 +136,94 @@ int main(void){
         // Move to 180°
         TIMA1_PWM_DutyCycle(0, servo_angle_to_duty(180));
         for(int i = 0; i < 100; i++) delay_10ms();
-			
-				//---------------------------------------------------------
-        // 1. Forward: 0% ? 100%
-        // ---------------------------------------------------------
-        for(int i = 0; i <= 100; i++){
-            double duty = ((double)i) / 100.0;
-
-            TIMA0_PWM_DutyCycle(0, duty);   // Forward PWM active
-            TIMA0_PWM_DutyCycle(1, 0.0);    // Reverse off
-
-            delay_10ms();
-        }
-
-        // ---------------------------------------------------------
-        // 2. Forward: 100% ? 0%
-        // ---------------------------------------------------------
-        for(int i = 100; i >= 0; i--){
-            double duty = ((double)i) / 100.0;
-
-            TIMA0_PWM_DutyCycle(0, duty);
-            TIMA0_PWM_DutyCycle(1, 0.0);
-
-            delay_10ms();
-        }
-
-        // ---------------------------------------------------------
-        // 3. Reverse: 0% ? 100%
-        // ---------------------------------------------------------
-        for(int i = 0; i <= 100; i++){
-            double duty = ((double)i) / 100.0;
-
-            TIMA0_PWM_DutyCycle(1, duty);   // Reverse PWM active
-            TIMA0_PWM_DutyCycle(0, 0.0);    // Forward off
-
-            delay_10ms();
-        }
-
-        // ---------------------------------------------------------
-        // 4. Reverse: 100% ? 0%
-        // ---------------------------------------------------------
-        for(int i = 100; i >= 0; i--){
-            double duty = ((double)i) / 100.0;
-
-            TIMA0_PWM_DutyCycle(1, duty);
-            TIMA0_PWM_DutyCycle(0, 0.0);
-
-            delay_10ms();
-        }
-				
-
-
     }
 
     return 0;
 }
+
+//---------------------------------------------------------------------------------//
+
+//PART 4 SERVO AND DC
+//int main(void){
+//    UART0_init();
+
+//    // DC
+//    // 10 kHz period = 100 µs
+//    // 100 µs * 80 MHz = 8000 timer counts
+//		TIMA0_PWM_init(0, 3200, 0, 0.3);// 30% duty cycle
+//		TIMA0_PWM_init(1, 3200, 0, 0.3);// 30% duty cycle
+
+//    // SERVO
+//    // 20 ms period = 640 counts at 32 kHz
+//    TIMA1_PWM_init(0, 640, 0, 0.0);
+
+//    // Move servo to 90°
+//    double servoDuty = servo_angle_to_duty(90);
+//    TIMA1_PWM_DutyCycle(0, servoDuty);
+
+//    for(;;){
+//        // Idle loop — PWM hardware continues running
+//			 // Move to 0°
+//        TIMA1_PWM_DutyCycle(0, servo_angle_to_duty(0));
+//        for(int i = 0; i < 100; i++) delay_10ms();   // hold position
+
+//        // Move to 90°
+//        TIMA1_PWM_DutyCycle(0, servo_angle_to_duty(90));
+//        for(int i = 0; i < 100; i++) delay_10ms();
+
+//        // Move to 180°
+//        TIMA1_PWM_DutyCycle(0, servo_angle_to_duty(180));
+//        for(int i = 0; i < 100; i++) delay_10ms();
+//			
+//				//---------------------------------------------------------
+//        // 1. Forward: 0% ? 100%
+//        // ---------------------------------------------------------
+//        for(int i = 0; i <= 100; i++){
+//            double duty = ((double)i) / 100.0;
+
+//            TIMA0_PWM_DutyCycle(0, duty);   // Forward PWM active
+//            TIMA0_PWM_DutyCycle(1, 0.0);    // Reverse off
+
+//            delay_10ms();
+//        }
+
+//        // ---------------------------------------------------------
+//        // 2. Forward: 100% ? 0%
+//        // ---------------------------------------------------------
+//        for(int i = 100; i >= 0; i--){
+//            double duty = ((double)i) / 100.0;
+
+//            TIMA0_PWM_DutyCycle(0, duty);
+//            TIMA0_PWM_DutyCycle(1, 0.0);
+
+//            delay_10ms();
+//        }
+
+//        // ---------------------------------------------------------
+//        // 3. Reverse: 0% ? 100%
+//        // ---------------------------------------------------------
+//        for(int i = 0; i <= 100; i++){
+//            double duty = ((double)i) / 100.0;
+
+//            TIMA0_PWM_DutyCycle(1, duty);   // Reverse PWM active
+//            TIMA0_PWM_DutyCycle(0, 0.0);    // Forward off
+
+//            delay_10ms();
+//        }
+
+//        // ---------------------------------------------------------
+//        // 4. Reverse: 100% ? 0%
+//        // ---------------------------------------------------------
+//        for(int i = 100; i >= 0; i--){
+//            double duty = ((double)i) / 100.0;
+
+//            TIMA0_PWM_DutyCycle(1, duty);
+//            TIMA0_PWM_DutyCycle(0, 0.0);
+
+//            delay_10ms();
+//        }
+//				
+//    }
+//    return 0;
+//}
 
