@@ -23,15 +23,18 @@
  * A "watchdog" function stops the car if the track is lost for too long.
  *
  * Work needs to be done for timers: for camera, currently TIMG0: 100 kHz clock (319, 0) needs to be set output pin to PA12
- * and TIMG6: integration time ~7.5ms (60000, 3), need to set output pin to PA28.
+ * and TIMG6: integration time ~7.5ms (60000, 3), need to set output pin to PA28 Camera SI.
  *
  * and the following for motors:
 //    // DC
 //    // 10 kHz period = 100 µs 100 µs * 80 MHz = 8000 timer counts was (3200) "might have altered timers?"
 //    // Now (8000)
 //		TIMA0_PWM_init(0 (L), MOTOR_PERIOD_TICKS, 0, 0.0);// 0% duty cycle off initilization
-//		TIMA0_PWM_init(1 (R), MOTOR_PERIOD_TICKS, 0, 0.0);// 0% duty cycle off initilization
-//			Need to set this timers output pin to PB4
+//		TIMA0_PWM_init(2 (R), MOTOR_PERIOD_TICKS, 0, 0.0);// 0% duty cycle off initilization
+//	  Need to set lefts timer output pin to PB8
+//			Set enable pin PB19
+//    Need to set lefts timer output pin to PB17\
+//			Set enable pin PA22
 
 //    // SERVO
 //    // 20 ms period = 640 counts at 32 kHz was (640)
@@ -82,7 +85,7 @@
 /* Motor PWM (TIMA0) */
 #define MOTOR_PERIOD_TICKS      8000UL    
 #define LEFT_CH                 0
-#define RIGHT_CH                1
+#define RIGHT_CH                2
 
 /* Throttle rules */
 #define MAX_THROTTLE            0.50f     // never exceed 50%
