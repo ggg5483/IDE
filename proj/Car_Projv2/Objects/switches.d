@@ -1,10 +1,9 @@
-./objects/main.o: ..\..\lib\car\main.c \
-  C:\Keil_v5\ARM\ARMCLANG\Bin\..\include\stdint.h \
-  C:\Keil_v5\ARM\ARMCLANG\Bin\..\include\stdbool.h \
-  C:\Keil_v5\ARM\ARMCLANG\Bin\..\include\math.h \
+./objects/switches.o: ..\..\lib\car\switches.c \
   ..\..\source\ti\devices\msp\msp.h \
   ..\..\source\ti\devices\DeviceFamily.h \
   ..\..\source\ti\devices\msp\m0p\mspm0g350x.h \
+  C:\Keil_v5\ARM\ARMCLANG\Bin\..\include\stdint.h \
+  C:\Keil_v5\ARM\ARMCLANG\Bin\..\include\stdbool.h \
   C:\Users\alexx\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include\core_cm0plus.h \
   C:\Users\alexx\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include\cmsis_version.h \
   C:\Users\alexx\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include\cmsis_compiler.h \
@@ -38,5 +37,4 @@
   ..\..\source\ti\devices\msp\peripherals\m0p\hw_debugss.h \
   ..\..\source\ti\devices\msp\peripherals\m0p\hw_sysctl.h \
   ..\..\source\ti\devices\msp\peripherals\m0p\sysctl\hw_sysctl_mspm0g1x0x_g3x0x.h \
-  ..\..\lib\car\switches.h ..\..\lib\car\camera.h ..\..\lib\car\adc12.h \
-  ..\..\lib\car\timers.h ..\..\lib\car\uart_extras.h
+  ..\..\lib\car\switches.h

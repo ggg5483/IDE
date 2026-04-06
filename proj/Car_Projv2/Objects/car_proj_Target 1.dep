@@ -1,6 +1,6 @@
 Dependencies for Project 'car_proj', Target 'Target 1': (DO NOT MODIFY !)
 CompilerVersion: 6140000::V6.14::ARMCLANG
-F (..\..\lib\car\main.c)(0x69D3F98E)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m0plus -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-D__EVAL -gdwarf-3 -Oz -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -I ../../source -I ../../lib-I./RTE/_Target_1-IC:/Users/alexx/AppData/Local/Arm/Packs/ARM/CMSIS/5.7.0/CMSIS/Core/Include-D__UVISION_VERSION="531" -D_RTE_ -D_RTE_ -D__MSPM0G3507__ -D__MSPM0G3507__-o ./objects/main.o -MD)
+F (..\..\lib\car\main.c)(0x69D41926)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m0plus -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-D__EVAL -gdwarf-3 -Oz -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -I ../../source -I ../../lib-I./RTE/_Target_1-IC:/Users/alexx/AppData/Local/Arm/Packs/ARM/CMSIS/5.7.0/CMSIS/Core/Include-D__UVISION_VERSION="531" -D_RTE_ -D_RTE_ -D__MSPM0G3507__ -D__MSPM0G3507__-o ./objects/main.o -MD)
 I (C:\Keil_v5\ARM\ARMCLANG\include\stdint.h)(0x5ED6B4A4)
 I (C:\Keil_v5\ARM\ARMCLANG\include\stdbool.h)(0x5ED6B4A4)
 I (C:\Keil_v5\ARM\ARMCLANG\include\math.h)(0x5ED6B4A4)
@@ -40,6 +40,7 @@ I (..\..\source\ti\devices\msp\peripherals\m0p\hw_cpuss.h)(0x698F5EDC)
 I (..\..\source\ti\devices\msp\peripherals\m0p\hw_debugss.h)(0x698F5EDC)
 I (..\..\source\ti\devices\msp\peripherals\m0p\hw_sysctl.h)(0x698F5EDC)
 I (..\..\source\ti\devices\msp\peripherals\m0p\sysctl\hw_sysctl_mspm0g1x0x_g3x0x.h)(0x698F5EDC)
+I (..\..\lib\car\switches.h)(0x69D41583)
 I (..\..\lib\car\camera.h)(0x69D3F50B)
 I (..\..\lib\car\adc12.h)(0x69D3F50B)
 I (..\..\lib\car\timers.h)(0x69D3F50B)
@@ -127,7 +128,7 @@ I (..\..\source\ti\devices\msp\peripherals\m0p\hw_sysctl.h)(0x698F5EDC)
 I (..\..\source\ti\devices\msp\peripherals\m0p\sysctl\hw_sysctl_mspm0g1x0x_g3x0x.h)(0x698F5EDC)
 I (..\..\lib\car\timers.h)(0x69D3F50B)
 I (..\..\lib\car\adc12.h)(0x69D3F50B)
-F (..\..\lib\car\timers.c)(0x69D3F50B)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m0plus -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-D__EVAL -gdwarf-3 -Oz -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -I ../../source -I ../../lib-I./RTE/_Target_1-IC:/Users/alexx/AppData/Local/Arm/Packs/ARM/CMSIS/5.7.0/CMSIS/Core/Include-D__UVISION_VERSION="531" -D_RTE_ -D_RTE_ -D__MSPM0G3507__ -D__MSPM0G3507__-o ./objects/timers.o -MD)
+F (..\..\lib\car\timers.c)(0x69D4102E)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m0plus -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-D__EVAL -gdwarf-3 -Oz -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -I ../../source -I ../../lib-I./RTE/_Target_1-IC:/Users/alexx/AppData/Local/Arm/Packs/ARM/CMSIS/5.7.0/CMSIS/Core/Include-D__UVISION_VERSION="531" -D_RTE_ -D_RTE_ -D__MSPM0G3507__ -D__MSPM0G3507__-o ./objects/timers.o -MD)
 I (..\..\lib\car\timers.h)(0x69D3F50B)
 I (C:\Keil_v5\ARM\ARMCLANG\include\stdint.h)(0x5ED6B4A4)
 I (..\..\source\ti\devices\msp\msp.h)(0x698F5EDC)
@@ -211,3 +212,49 @@ I (..\..\lib\car\uart.h)(0x69D3F50B)
 F (..\..\lib\car\uart_extras.c)(0x69D3F50B)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m0plus -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-D__EVAL -gdwarf-3 -Oz -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -I ../../source -I ../../lib-I./RTE/_Target_1-IC:/Users/alexx/AppData/Local/Arm/Packs/ARM/CMSIS/5.7.0/CMSIS/Core/Include-D__UVISION_VERSION="531" -D_RTE_ -D_RTE_ -D__MSPM0G3507__ -D__MSPM0G3507__-o ./objects/uart_extras.o -MD)
 I (..\..\lib\car\uart_extras.h)(0x69D3F50B)
 I (..\..\lib\lab2\uart.h)(0x698F5EDB)
+F (..\..\lib\car\adc12.h)(0x69D3F50B)()
+F (..\..\lib\car\camera.h)(0x69D3F50B)()
+F (..\..\lib\car\timers.h)(0x69D3F50B)()
+F (..\..\lib\car\uart.h)(0x69D3F50B)()
+F (..\..\lib\car\uart_extras.h)(0x69D3F50B)()
+F (..\..\lib\car\switches.c)(0x69D4157A)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m0plus -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-D__EVAL -gdwarf-3 -Oz -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -I ../../source -I ../../lib-I./RTE/_Target_1-IC:/Users/alexx/AppData/Local/Arm/Packs/ARM/CMSIS/5.7.0/CMSIS/Core/Include-D__UVISION_VERSION="531" -D_RTE_ -D_RTE_ -D__MSPM0G3507__ -D__MSPM0G3507__-o ./objects/switches.o -MD)
+I (..\..\source\ti\devices\msp\msp.h)(0x698F5EDC)
+I (..\..\source\ti\devices\DeviceFamily.h)(0x698F5EDC)
+I (..\..\source\ti\devices\msp\m0p\mspm0g350x.h)(0x698F5EDC)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stdint.h)(0x5ED6B4A4)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stdbool.h)(0x5ED6B4A4)
+I (C:\Users\alexx\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include\core_cm0plus.h)(0x5E8F79E2)
+I (C:\Users\alexx\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include\cmsis_version.h)(0x5E8F79E2)
+I (C:\Users\alexx\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include\cmsis_compiler.h)(0x5E83AF82)
+I (C:\Users\alexx\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include\cmsis_armclang.h)(0x5E8F79E2)
+I (C:\Keil_v5\ARM\ARMCLANG\include\arm_compat.h)(0x5E0D6BAC)
+I (C:\Keil_v5\ARM\ARMCLANG\include\arm_acle.h)(0x5E0D6BD8)
+I (C:\Users\alexx\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include\mpu_armv7.h)(0x5E8F79E2)
+I (..\..\source\ti\devices\msp\peripherals\hw_adc12.h)(0x698F5EDC)
+I (..\..\source\ti\devices\msp\peripherals\hw_aes.h)(0x698F5EDC)
+I (..\..\source\ti\devices\msp\peripherals\hw_comp.h)(0x698F5EDC)
+I (..\..\source\ti\devices\msp\peripherals\hw_crc.h)(0x698F5EDC)
+I (..\..\source\ti\devices\msp\peripherals\hw_dac12.h)(0x698F5EDC)
+I (..\..\source\ti\devices\msp\peripherals\hw_dma.h)(0x698F5EDC)
+I (..\..\source\ti\devices\msp\peripherals\hw_flashctl.h)(0x698F5EDC)
+I (..\..\source\ti\devices\msp\peripherals\hw_gpio.h)(0x698F5EDC)
+I (..\..\source\ti\devices\msp\peripherals\hw_gptimer.h)(0x698F5EDC)
+I (..\..\source\ti\devices\msp\peripherals\hw_i2c.h)(0x698F5EDC)
+I (..\..\source\ti\devices\msp\peripherals\hw_iomux.h)(0x698F5EDC)
+I (..\..\source\ti\devices\msp\peripherals\hw_mathacl.h)(0x698F5EDC)
+I (..\..\source\ti\devices\msp\peripherals\hw_mcan.h)(0x698F5EDC)
+I (..\..\source\ti\devices\msp\peripherals\hw_oa.h)(0x698F5EDC)
+I (..\..\source\ti\devices\msp\peripherals\hw_rtc.h)(0x698F5EDC)
+I (..\..\source\ti\devices\msp\peripherals\hw_spi.h)(0x698F5EDC)
+I (..\..\source\ti\devices\msp\peripherals\hw_trng.h)(0x698F5EDC)
+I (..\..\source\ti\devices\msp\peripherals\hw_uart.h)(0x698F5EDC)
+I (..\..\source\ti\devices\msp\peripherals\hw_vref.h)(0x698F5EDC)
+I (..\..\source\ti\devices\msp\peripherals\hw_wuc.h)(0x698F5EDC)
+I (..\..\source\ti\devices\msp\peripherals\hw_wwdt.h)(0x698F5EDC)
+I (..\..\source\ti\devices\msp\peripherals\m0p\hw_factoryregion.h)(0x698F5EDC)
+I (..\..\source\ti\devices\msp\peripherals\m0p\hw_cpuss.h)(0x698F5EDC)
+I (..\..\source\ti\devices\msp\peripherals\m0p\hw_debugss.h)(0x698F5EDC)
+I (..\..\source\ti\devices\msp\peripherals\m0p\hw_sysctl.h)(0x698F5EDC)
+I (..\..\source\ti\devices\msp\peripherals\m0p\sysctl\hw_sysctl_mspm0g1x0x_g3x0x.h)(0x698F5EDC)
+I (..\..\lib\car\switches.h)(0x69D41583)
+F (..\..\lib\car\switches.h)(0x69D41583)()

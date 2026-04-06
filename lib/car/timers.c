@@ -216,14 +216,18 @@ void TIMA0_PWM_init(uint8_t pin, uint32_t period, uint32_t prescaler, double per
 	/*set CCP direction*/
 	TIMA0->COMMONREGS.CCPD = 0x7;
 	
+	// Need to add an if statement to derive between channels 2 and 0
 	/*set IO */
-	//channel (pin) 0
+	//channel (pin) 0 left DC Forward
 	//PB8 PINCM25
-	IOMUX->SECCFG.PINCM[IOMUX_PINCM25] = IOMUX_PINCM25_PF_TIMA0_CCP0 | IOMUX_PINCM_PC_CONNECTED;
-	//channel (pin) 1
+	if (pin == 0) {
+	IOMUX->SECCFG.PINCM[IOMUX_PINCM25] = IOMUX_PINCM25_PF_TIMA0_CCP0 | IOMUX_PINCM_PC_CONNECTED; }
+	
+	//channel (pin) 2 right DC Forward
 	//PA22 PINCM47
-	IOMUX->SECCFG.PINCM[IOMUX_PINCM47] = IOMUX_PINCM47_PF_TIMA0_CCP1 | IOMUX_PINCM_PC_CONNECTED;
-
+	if (pin == 2) {
+	IOMUX->SECCFG.PINCM[IOMUX_PINCM43] = IOMUX_PINCM43_PF_TIMA0_CCP2 | IOMUX_PINCM_PC_CONNECTED; }
+  
 	
 	/*set CCCTL reg*/
 	TIMA0->COUNTERREGS.CCCTL_01[pin] = 0;
@@ -280,7 +284,7 @@ void TIMA1_PWM_init(uint8_t pin, uint32_t period, uint32_t prescaler, double per
 	
 	/*set IO */
 	//PB4
-	IOMUX->SECCFG.PINCM[IOMUX_PINCM17] = IOMUX_PINCM17_PF_TIMA1_CCP0 | IOMUX_PINCM_PC_CONNECTED;
+	IOMUX->SECCFG.PINCM[IOMUX_PINCM17] = IOMUX_PINCM17_PF_TIMA1_CCP0| IOMUX_PINCM_PC_CONNECTED;
 	
 	/*set CCCTL reg*/
 	TIMA1->COUNTERREGS.CCCTL_01[pin] = 0;

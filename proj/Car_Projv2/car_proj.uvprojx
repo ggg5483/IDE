@@ -423,6 +423,41 @@
               <FileType>1</FileType>
               <FilePath>..\..\lib\car\uart_extras.c</FilePath>
             </File>
+            <File>
+              <FileName>adc12.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\lib\car\adc12.h</FilePath>
+            </File>
+            <File>
+              <FileName>camera.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\lib\car\camera.h</FilePath>
+            </File>
+            <File>
+              <FileName>timers.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\lib\car\timers.h</FilePath>
+            </File>
+            <File>
+              <FileName>uart.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\lib\car\uart.h</FilePath>
+            </File>
+            <File>
+              <FileName>uart_extras.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\lib\car\uart_extras.h</FilePath>
+            </File>
+            <File>
+              <FileName>switches.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\lib\car\switches.c</FilePath>
+            </File>
+            <File>
+              <FileName>switches.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\lib\car\switches.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

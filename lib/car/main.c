@@ -22,18 +22,18 @@
  * A "watchdog" function stops the car if the track is lost for too long.
  *
  * --------------------------------------------------------------------------------------------------------------------------- *
- * Work needs to be done for timers: for camera, currently TIMG0: 100 kHz clock (319, 0) needs to be set output pin to PA12
- * and TIMG6: integration time ~7.5ms (60000, 3), need to set output pin to PA28 Camera SI.
+ * Work needs to be done for timers: for camera, currently TIMG0: 100 kHz clock (319, 0) needs to be set to output pin to PA12
+ * and TIMG6: integration time ~7.5ms (60000, 3), needs to be set to output pin to PA28 Camera SI.
  *
  * and the following for motors:
 //    // DC
-//    // 10 kHz period = 100 µs 100 µs * 80 MHz = 8000 timer counts was (3200) "might have altered timers?"
-//		TIMA0_PWM_init(0 (L), MOTOR_PERIOD_TICKS, 0, 0.0);// 0% duty cycle off initilization
-//		TIMA0_PWM_init(2 (R), MOTOR_PERIOD_TICKS, 0, 0.0);// 0% duty cycle off initilization
-//	  Need to set lefts timer output pin to PB8
-//			Set enable pin PB19
+//    // 10 kHz period = 100 µs 100 µs * 80 MHz = 8000 timer counts was (3200)
+//      TIMA0_PWM_init(0 (L), MOTOR_PERIOD_TICKS, 0, 0.0);// 0% duty cycle off initilization
+//      TIMA0_PWM_init(2 (R), MOTOR_PERIOD_TICKS, 0, 0.0);// 0% duty cycle off initilization
+//    Need to set lefts timer output pin to PB8
+//          Set enable pin PB19
 //    Need to set lefts timer output pin to PB17
-//			Set enable pin PA22
+//          Set enable pin PA22
 
 //    // SERVO
 //    // 20 ms period = 640 counts at 32 kHz was (640)
@@ -49,6 +49,7 @@
 #include <math.h>
 #include <ti/devices/msp/msp.h>
 
+#include "switches.h"
 #include "camera.h"
 #include "adc12.h"
 #include "timers.h"
@@ -65,7 +66,7 @@
 
 /* Filtering */
 #define FILTER_WINDOW           5         // moving-average window
-#define NO_TRACK_LIMIT          6         // watchdog threshold
+#define NO_TRACK_LIMIT          6         // watchdog threshold (frames)
 
 /* PID gains (tuned for hybrid control) */
 #define KP  0.020f
@@ -118,7 +119,6 @@ static float ramp(float cur, float tgt, float step) {
 static float pulse_to_frac(float us) {
     return us / SERVO_PERIOD_US;
 }
-
 
 /* ============================================================
  *                CAMERA CENTROID + THRESHOLDING
@@ -204,6 +204,32 @@ static float cf_get(CentroidFilter *f) {
  *                          MAIN LOOP
  * ============================================================ */
 
+/* Small busy delay used for ms waits */
+static void busy_delay_ms(uint32_t ms) {
+    volatile uint32_t outer = ms;
+    while (outer--) {
+        volatile uint32_t inner = 12000U; // approximate inner loop for ~1ms; adjust if needed
+        while (inner--) __asm__("nop");
+    }
+}
+
+/* Debounced read of S1 (active-high). Returns 1 if pressed (stable). */
+static int read_start_button_debounced(void) {
+    if (!S1_pressed()) return 0;
+    busy_delay_ms(50);
+    return S1_pressed() ? 1 : 0;
+}
+
+/* Wait until S1 is pressed (blocking). Returns after a stable press is detected. */
+static void wait_for_start_press(void) {
+    while (1) {
+        if (read_start_button_debounced()) {
+            return;
+        }
+        busy_delay_ms(10);
+    }
+}
+
 int main(void) {
 
     /* ---------- Initialize subsystems ---------- */
@@ -230,111 +256,174 @@ int main(void) {
 
     int no_track = 0;
     uint8_t bin[128];
-		
-		//need to add button functionality to start the car instead of starting right off flashing
+        
+        //need to add button functionality to start the car instead of starting right off flashing
 
 
     /* ============================================================
      *                     CONTROL LOOP
      * ============================================================ */
+
+    /* Initialize start switch S1 (polling mode) */
+    S1_init();
+
+    /* Ensure motors and servo are safe at boot */
+    TIMA0_PWM_DutyCycle(LEFT_CH, 0.0);
+    TIMA0_PWM_DutyCycle(RIGHT_CH, 0.0);
+    TIMA1_PWM_DutyCycle(SERVO_CH, servo_frac);
+
+    typedef enum { STATE_IDLE = 0, STATE_ARMING, STATE_RUNNING } system_state_t;
+    system_state_t state = STATE_IDLE;
+
     while (1) {
 
-        /* Wait for camera frame */
-        if (!Camera_isDataReady()) continue;
-        uint16_t *raw = Camera_getData();
+        if (state == STATE_IDLE) {
+            /* Idle: wait for start button press */
+            wait_for_start_press();
 
-        /* Compute centroid */
-        int cen = compute_centroid(raw, bin);
+            /* When pressed, move to arming state (countdown) */
+            state = STATE_ARMING;
 
-        /* Watchdog tracking */
-        if (cen < 0) no_track++;
-        else { no_track = 0; cf_push(&filt, cen); }
+            /* 5 second arming delay with periodic feedback */
+            uint32_t elapsed = 0;
+            while (elapsed < 5000U) {
+                busy_delay_ms(1000);
+                elapsed += 1000U;
+            }
 
-        float fcen = cf_get(&filt);
-        bool on_track = (fcen >= 0);
+            /* Reset control integrators and filters before running */
+            integ = 0.0f;
+            prev_err = 0.0f;
+            cf_init(&filt);
+            no_track = 0;
 
-        /* If track lost/too long ? stop car */
-        if (no_track >= NO_TRACK_LIMIT) {
-            target_throttle = 0;
-            throttle = ramp(throttle, target_throttle, THROTTLE_RAMP);
-            TIMA0_PWM_DutyCycle(LEFT_CH, (double) throttle);
-            TIMA0_PWM_DutyCycle(RIGHT_CH, (double) throttle);
-            continue;
-        }
-
-        /* Compute steering error */
-        float err = on_track ? (CAMERA_CENTER - fcen) : 0;
-
-        /* PID update */
-        integ += err;
-        float deriv = err - prev_err;
-        prev_err = err;
-
-        float pid = KP*err + KI*integ + KD*deriv;
-
-
-        /* ============================================================
-         *                PRIMARY STEERING — SERVO
-         * ============================================================ */
-
-        /* Convert PID ? servo pulse width */
-        float servo_us = SERVO_CENTER_US + pid * 6.0f;  // 6us per pixel
-
-        /* Clamp to servo limits */
-        if (servo_us < SERVO_MIN_US) servo_us = SERVO_MIN_US;
-        if (servo_us > SERVO_MAX_US) servo_us = SERVO_MAX_US;
-
-        /* Smooth servo motion */
-        servo_frac = ramp(servo_frac, pulse_to_frac(servo_us), 0.001f);
-        TIMA1_PWM_DutyCycle(SERVO_CH, (double) servo_frac);
-
-
-        /* ============================================================
-         *          SECONDARY STEERING — DIFFERENTIAL TORQUE
-         * ============================================================ */
-
-        /* PID ? differential torque split */
-        float diff = pid * DIFF_SCALE;
-        if (diff > DIFF_MAX) diff = DIFF_MAX;
-        if (diff < -DIFF_MAX) diff = -DIFF_MAX;
-
-
-        /* ============================================================
-         *                     THROTTLE CONTROL
-         * ============================================================ */
-
-        /* Slow down when steering significantly */
-        if (on_track && fabsf(err) <= CENTER_DEADBAND)
+            /* Set initial throttle target and ramp from zero */
             target_throttle = MAX_THROTTLE;
-        else
-            target_throttle = TURN_THROTTLE;
-
-        /* Smooth throttle changes */
-        throttle = ramp(throttle, target_throttle, THROTTLE_RAMP);
-
-
-        /* ============================================================
-         *                     MOTOR OUTPUT
-         * ============================================================ */
-
-        /* Apply differential steering */
-        float L = throttle * (1 - diff);
-        float R = throttle * (1 + diff);
-
-        /* Enforce 50% max rule */
-        float maxLR = fmaxf(L, R);
-        if (maxLR > MAX_THROTTLE) {
-            float s = MAX_THROTTLE / maxLR;
-            L *= s;
-            R *= s;
+            state = STATE_RUNNING;
         }
 
-        /* Prevent negative torque */
-        if (L < 0) L = 0;
-        if (R < 0) R = 0;
+        if (state == STATE_RUNNING) {
 
-        /* Output PWM */
-        TIMA0_PWM_DutyCycle(LEFT_CH, (double) L);
-        TIMA0_PWM_DutyCycle(RIGHT_CH, (double) R);
+            /* Wait for camera frame */
+            if (!Camera_isDataReady()) {
+                busy_delay_ms(1);
+                continue;
+            }
+            uint16_t *raw = Camera_getData();
+
+            /* Compute centroid */
+            int cen = compute_centroid(raw, bin);
+
+            /* Watchdog tracking */
+            if (cen < 0) no_track++;
+            else { no_track = 0; cf_push(&filt, cen); }
+
+            float fcen = cf_get(&filt);
+            bool on_track = (fcen >= 0);
+
+            /* If track lost/too long ? stop car and return to IDLE */
+            if (no_track >= NO_TRACK_LIMIT) {
+
+                target_throttle = 0;
+                while (throttle > 0.001f) {
+                    throttle = ramp(throttle, target_throttle, THROTTLE_RAMP);
+                    TIMA0_PWM_DutyCycle(LEFT_CH, (double) throttle);
+                    TIMA0_PWM_DutyCycle(RIGHT_CH, (double) throttle);
+                    busy_delay_ms(10);
+                }
+
+                /* Center servo for safety */
+                servo_frac = pulse_to_frac(SERVO_CENTER_US);
+                TIMA1_PWM_DutyCycle(SERVO_CH, (double) servo_frac);
+
+                /* Reset integrators and filter to avoid stale state */
+                integ = 0.0f;
+                prev_err = 0.0f;
+                cf_init(&filt);
+                no_track = 0;
+
+                /* Move to IDLE and wait for next start press */
+                state = STATE_IDLE;
+                continue;
+            }
+
+            /* Compute steering error */
+            float err = on_track ? (CAMERA_CENTER - fcen) : 0;
+
+            /* PID update */
+            integ += err;
+            float deriv = err - prev_err;
+            prev_err = err;
+
+            float pid = KP*err + KI*integ + KD*deriv;
+
+
+            /* ============================================================
+             *                PRIMARY STEERING — SERVO
+             * ============================================================ */
+
+            /* Convert PID ? servo pulse width */
+            float servo_us = SERVO_CENTER_US + pid * 6.0f;  // 6us per pixel
+
+            /* Clamp to servo limits */
+            if (servo_us < SERVO_MIN_US) servo_us = SERVO_MIN_US;
+            if (servo_us > SERVO_MAX_US) servo_us = SERVO_MAX_US;
+
+            /* Smooth servo motion */
+            servo_frac = ramp(servo_frac, pulse_to_frac(servo_us), 0.001f);
+            TIMA1_PWM_DutyCycle(SERVO_CH, (double) servo_frac);
+
+
+            /* ============================================================
+             *          SECONDARY STEERING — DIFFERENTIAL TORQUE
+             * ============================================================ */
+
+            /* PID ? differential torque split */
+            float diff = pid * DIFF_SCALE;
+            if (diff > DIFF_MAX) diff = DIFF_MAX;
+            if (diff < -DIFF_MAX) diff = -DIFF_MAX;
+
+
+            /* ============================================================
+             *                     THROTTLE CONTROL
+             * ============================================================ */
+
+            /* Slow down when steering significantly */
+            if (on_track && fabsf(err) <= CENTER_DEADBAND)
+                target_throttle = MAX_THROTTLE;
+            else
+                target_throttle = TURN_THROTTLE;
+
+            /* Smooth throttle changes */
+            throttle = ramp(throttle, target_throttle, THROTTLE_RAMP);
+
+
+            /* ============================================================
+             *                     MOTOR OUTPUT
+             * ============================================================ */
+
+            /* Apply differential steering */
+            float L = throttle * (1 - diff);
+            float R = throttle * (1 + diff);
+
+            /* Enforce 50% max rule */
+            float maxLR = fmaxf(L, R);
+            if (maxLR > MAX_THROTTLE) {
+                float s = MAX_THROTTLE / maxLR;
+                L *= s;
+                R *= s;
+            }
+
+            /* Prevent negative torque */
+            if (L < 0) L = 0;
+            if (R < 0) R = 0;
+
+            /* Output PWM */
+            TIMA0_PWM_DutyCycle(LEFT_CH, (double) L);
+            TIMA0_PWM_DutyCycle(RIGHT_CH, (double) R);
+        }
+
+        /* small delay to avoid tight loop */
+        busy_delay_ms(1);
     }
 }
