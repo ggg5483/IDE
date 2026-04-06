@@ -199,7 +199,6 @@ int main(void) {
 
     /* ---------- Initialize subsystems ---------- */
     UART0_init();
-    UART0_put("Hybrid Steering Car Booting...\r\n");
 
     ADC0_init();
     Camera_init();
