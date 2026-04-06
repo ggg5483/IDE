@@ -10,7 +10,7 @@
  * ******************************************************************************
 */
 
-#include "timers.h"
+#include "./timers.h"
 #include <ti/devices/msp/msp.h>
 #include <stdint.h>
 
