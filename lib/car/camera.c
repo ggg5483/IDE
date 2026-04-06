@@ -18,6 +18,7 @@
 #include "timers.h"
 #include "adc12.h"
 
+
 static volatile uint16_t cameraData[128];
 static volatile uint16_t pixelCounter = 0;
 static volatile uint8_t  cameraData_complete = 0;
@@ -84,3 +85,63 @@ uint16_t* Camera_getData(void)
     return (uint16_t*)cameraData;
 }
 
+void TIMG6_IRQHandler(void)
+{
+    /* Clear interrupt */
+    //TIMG6->CPU_INT.ICLR = GPTIMER_CPU_INT_ICLR_Z_CLR;
+
+    /* Ensure CLK disabled */
+    TIMG0->COUNTERREGS.CTRCTL &= ~GPTIMER_CTRCTL_EN_ENABLED;
+
+    /* start new frame*/
+		cameraData_complete = 0;
+	
+    pixelCounter = 0U;
+
+    /* Start capture sequence */
+    GPIOA->DOUTCLR31_0 = CAM_CLK_MASK;
+    GPIOA->DOUTSET31_0 = CAM_SI_MASK;
+
+    GPIOA->DOUTSET31_0 = CAM_CLK_MASK;
+    GPIOA->DOUTCLR31_0 = CAM_CLK_MASK;
+
+    GPIOA->DOUTCLR31_0 = CAM_SI_MASK;
+
+    /* Enable CLK timer */
+    TIMG0->COUNTERREGS.CTRCTL |= GPTIMER_CTRCTL_EN_ENABLED;
+}
+
+/**
+ * @brief TIMG0 ISR – drives CLK and samples ADC
+*/
+void TIMG0_IRQHandler(void)
+{
+    /* Clear interrupt */
+    //TIMG0->CPU_INT.ICLR = GPTIMER_CPU_INT_ICLR_Z_CLR;
+
+		#if 1
+    /* Pulse CLK */
+    GPIOA->DOUTSET31_0 = CAM_CLK_MASK;
+
+    /* Sample ADC */
+    uint32_t adcVal = ADC0_getVal();
+
+    if (pixelCounter < 128U) {
+        cameraData[pixelCounter++] = (uint16_t)adcVal;
+    }
+
+    GPIOA->DOUTCLR31_0 = CAM_CLK_MASK;
+
+    /* End of frame */
+    if (pixelCounter >= 128U) {
+        cameraData_complete = 1U;
+        pixelCounter = 0U;
+
+        /* Disable CLK */
+        TIMG0->COUNTERREGS.CTRCTL &= ~GPTIMER_CTRCTL_EN_ENABLED;
+    }
+		#else
+		GPIOA->DOUTTGL31_0 = CAM_CLK_MASK;
+		GPIOA->DOUTTGL31_0 = CAM_SI_MASK;
+		#endif
+}
