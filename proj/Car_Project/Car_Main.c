@@ -198,7 +198,6 @@ static float cf_get(CentroidFilter *f) {
 int main(void) {
 
     /* ---------- Initialize subsystems ---------- */
-    UART0_init();
 
     ADC0_init();
     Camera_init();
@@ -222,6 +221,8 @@ int main(void) {
 
     int no_track = 0;
     uint8_t bin[128];
+		
+		//need to add button functionality to start the car instead of starting right off flashing
 
 
     /* ============================================================
@@ -243,7 +244,7 @@ int main(void) {
         float fcen = cf_get(&filt);
         bool on_track = (fcen >= 0);
 
-        /* If track lost too long ? stop car */
+        /* If track lost/too long ? stop car */
         if (no_track >= NO_TRACK_LIMIT) {
             target_throttle = 0;
             throttle = ramp(throttle, target_throttle, THROTTLE_RAMP);
