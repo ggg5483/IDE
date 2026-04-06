@@ -18,27 +18,25 @@
  *   - Servo angle (primary)
  *   - Differential torque split (secondary)
  *
- * --------------------------------------------------------------------------------------------------------------------------- *
  * Throttle changes smoothly and never exceeds 50% (course rule).
  * A "watchdog" function stops the car if the track is lost for too long.
  *
+ * --------------------------------------------------------------------------------------------------------------------------- *
  * Work needs to be done for timers: for camera, currently TIMG0: 100 kHz clock (319, 0) needs to be set output pin to PA12
  * and TIMG6: integration time ~7.5ms (60000, 3), need to set output pin to PA28 Camera SI.
  *
  * and the following for motors:
 //    // DC
 //    // 10 kHz period = 100 µs 100 µs * 80 MHz = 8000 timer counts was (3200) "might have altered timers?"
-//    // Now (8000)
 //		TIMA0_PWM_init(0 (L), MOTOR_PERIOD_TICKS, 0, 0.0);// 0% duty cycle off initilization
 //		TIMA0_PWM_init(2 (R), MOTOR_PERIOD_TICKS, 0, 0.0);// 0% duty cycle off initilization
 //	  Need to set lefts timer output pin to PB8
 //			Set enable pin PB19
-//    Need to set lefts timer output pin to PB17\
+//    Need to set lefts timer output pin to PB17
 //			Set enable pin PA22
 
 //    // SERVO
 //    // 20 ms period = 640 counts at 32 kHz was (640)
-//    // Now 50Hz (1600000)
 //    TIMA1_PWM_init(SERVO_CH (0), SERVO_PERIOD_TICKS, 0, servo_frac); straight off initilization
 //    Need to set this timers output pin to PB4
  *
@@ -75,7 +73,7 @@
 #define KD  0.001f
 
 /* Servo PWM (TIMA1) */
-#define SERVO_PERIOD_TICKS      1600000UL // 50 Hz PWM
+#define SERVO_PERIOD_TICKS      640 // 50 Hz PWM
 #define SERVO_CH                0
 #define SERVO_MIN_US            1000.0f   // full left
 #define SERVO_CENTER_US         1500.0f   // straight
@@ -83,7 +81,7 @@
 #define SERVO_PERIOD_US         20000.0f  // 20 ms period
 
 /* Motor PWM (TIMA0) */
-#define MOTOR_PERIOD_TICKS      8000UL    
+#define MOTOR_PERIOD_TICKS      3200    
 #define LEFT_CH                 0
 #define RIGHT_CH                2
 
