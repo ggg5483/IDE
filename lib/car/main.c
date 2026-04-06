@@ -245,7 +245,8 @@ int main(void) {
     TIMA0_PWM_init(LEFT_CH, MOTOR_PERIOD_TICKS, 0, 0.0);
     TIMA0_PWM_init(RIGHT_CH, MOTOR_PERIOD_TICKS, 0, 0.0);
 	
-	// Power on GPIOB if needed
+		//---------------------------------------Motor Enable------------------------------------------------
+	  // Power on GPIOB if needed
     if ((GPIOB->GPRCM.PWREN & GPIO_PWREN_ENABLE_MASK) == 0U) {
         GPIOB->GPRCM.RSTCTL = GPIO_RSTCTL_RESETASSERT_ASSERT |
                               GPIO_RSTCTL_KEY_UNLOCK_W |
@@ -272,7 +273,8 @@ int main(void) {
     IOMUX->SECCFG.PINCM[IOMUX_PINCM47] |= (1U | IOMUX_PINCM_PC_CONNECTED);   // PA22 = PINCM47
     GPIOA->DOESET31_0 |= RIGHT_EN_MASK;  // enable output driver
     GPIOA->DOUTSET31_0 = RIGHT_EN_MASK;  // drive HIGH
-
+		//---------------------------------------------------------------------------------------------------
+		
     /* Servo PWM (TIMA1) — start centered */
     float servo_frac = pulse_to_frac(SERVO_CENTER_US);
     TIMA1_PWM_init(SERVO_CH, SERVO_PERIOD_TICKS, 0, servo_frac);
@@ -288,9 +290,6 @@ int main(void) {
 
     int no_track = 0;
     uint8_t bin[128];
-        
-        //need to add button functionality to start the car instead of starting right off flashing
-
 
     /* ============================================================
      *                     CONTROL LOOP
