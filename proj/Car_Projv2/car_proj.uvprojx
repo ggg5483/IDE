@@ -10,7 +10,7 @@
       <TargetName>Target 1</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pCCUsed>5060528::V5.06 update 5 (build 528)::ARMCC</pCCUsed>
+      <pCCUsed>6070000::V6.7::.\ARMCLANG</pCCUsed>
       <uAC6>1</uAC6>
       <TargetOption>
         <TargetCommonOption>
@@ -49,7 +49,7 @@
             <InvalidFlash>1</InvalidFlash>
           </TargetStatus>
           <OutputDirectory>.\Objects\</OutputDirectory>
-          <OutputName>main</OutputName>
+          <OutputName>car_proj</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
           <CreateHexFile>0</CreateHexFile>
@@ -323,7 +323,7 @@
             <wLevel>3</wLevel>
             <uThumb>0</uThumb>
             <uSurpInc>0</uSurpInc>
-            <uC99>0</uC99>
+            <uC99>1</uC99>
             <useXO>0</useXO>
             <v6Lang>3</v6Lang>
             <v6LangP>3</v6LangP>
@@ -381,69 +381,44 @@
           <GroupName>Source Group 1</GroupName>
           <Files>
             <File>
-              <FileName>Car_Main.c</FileName>
+              <FileName>main.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\Car_Main.c</FilePath>
-            </File>
-            <File>
-              <FileName>adc12.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\adc12.c</FilePath>
-            </File>
-            <File>
-              <FileName>adc12.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\adc12.h</FilePath>
-            </File>
-            <File>
-              <FileName>camera.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\camera.c</FilePath>
-            </File>
-            <File>
-              <FileName>camera.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\camera.h</FilePath>
-            </File>
-            <File>
-              <FileName>timers.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\timers.c</FilePath>
-            </File>
-            <File>
-              <FileName>timers.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\timers.h</FilePath>
-            </File>
-            <File>
-              <FileName>uart.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\uart.c</FilePath>
-            </File>
-            <File>
-              <FileName>uart.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\uart.h</FilePath>
-            </File>
-            <File>
-              <FileName>uart_extras.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\uart_extras.c</FilePath>
-            </File>
-            <File>
-              <FileName>uart_extras.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\uart_extras.h</FilePath>
+              <FilePath>..\..\lib\car\main.c</FilePath>
             </File>
             <File>
               <FileName>startup_mspm0g350x_uvision.s</FileName>
               <FileType>2</FileType>
               <FilePath>..\..\source\ti\devices\msp\m0p\startup_system_files\keil\startup_mspm0g350x_uvision.s</FilePath>
             </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>lib</GroupName>
+          <Files>
             <File>
-              <FileName>main.c</FileName>
+              <FileName>adc12.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\main.c</FilePath>
+              <FilePath>..\..\lib\car\adc12.c</FilePath>
+            </File>
+            <File>
+              <FileName>camera.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\lib\car\camera.c</FilePath>
+            </File>
+            <File>
+              <FileName>timers.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\lib\car\timers.c</FilePath>
+            </File>
+            <File>
+              <FileName>uart.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\lib\car\uart.c</FilePath>
+            </File>
+            <File>
+              <FileName>uart_extras.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\lib\car\uart_extras.c</FilePath>
             </File>
           </Files>
         </Group>

@@ -259,8 +259,8 @@ int main(void) {
         if (no_track >= NO_TRACK_LIMIT) {
             target_throttle = 0;
             throttle = ramp(throttle, target_throttle, THROTTLE_RAMP);
-            TIMA0_PWM_DutyCycle(LEFT_CH, throttle);
-            TIMA0_PWM_DutyCycle(RIGHT_CH, throttle);
+            TIMA0_PWM_DutyCycle(LEFT_CH, (double) throttle);
+            TIMA0_PWM_DutyCycle(RIGHT_CH, (double) throttle);
             continue;
         }
 
@@ -288,7 +288,7 @@ int main(void) {
 
         /* Smooth servo motion */
         servo_frac = ramp(servo_frac, pulse_to_frac(servo_us), 0.001f);
-        TIMA1_PWM_DutyCycle(SERVO_CH, servo_frac);
+        TIMA1_PWM_DutyCycle(SERVO_CH, (double) servo_frac);
 
 
         /* ============================================================
@@ -336,7 +336,7 @@ int main(void) {
         if (R < 0) R = 0;
 
         /* Output PWM */
-        TIMA0_PWM_DutyCycle(LEFT_CH, L);
-        TIMA0_PWM_DutyCycle(RIGHT_CH, R);
+        TIMA0_PWM_DutyCycle(LEFT_CH, (double) L);
+        TIMA0_PWM_DutyCycle(RIGHT_CH, (double) R);
     }
 }

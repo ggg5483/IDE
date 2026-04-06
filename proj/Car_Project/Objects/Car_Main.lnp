@@ -1,0 +1,13 @@
+--cpu Cortex-M0+
+".\objects\car_main.o"
+".\objects\adc12.o"
+".\objects\camera.o"
+".\objects\timers.o"
+".\objects\uart.o"
+".\objects\uart_extras.o"
+".\objects\startup_mspm0g350x_uvision.o"
+".\objects\main.o"
+--strict --scatter "..\..\source\ti\devices\msp\m0p\linker_files\keil\mspm0g3507.sct"
+--summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list ".\Listings\Car_Main.map" -o .\Objects\Car_Main.axf

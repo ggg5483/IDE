@@ -3,7 +3,7 @@
  * Auto generated Run-Time-Environment Component Configuration File
  *      *** Do not modify ! ***
  *
- * Project: 'lab05' 
+ * Project: 'car_proj' 
  * Target:  'Target 1' 
  */
 
