@@ -86,7 +86,7 @@
 #define DIFF_MAX                0.20f     // ±20% torque redistribution (max variance in motor assisted turning)
 
 /* Thresholding */
-#define THRESH_FACTOR           0.55f     // adaptive threshold factor (to account for wiggly track)
+#define THRESH_FACTOR           0.55f     // adaptive threshold factor (to account for wiggly track will need to be adjusted for intersections)
 
 
 /* ============================================================
@@ -120,7 +120,7 @@ static float pulse_to_frac(float us) {
  * Steps:
  *   1. Compute mean + max of raw ADC values
  *   2. Adaptive threshold = mean + (max - mean)*THRESH_FACTOR
- *   3. Binarize pixels ("band pass filter"
+ *   3. Binarize pixels ("band pass filter")
  *   4. Compute centroid of all '1' pixels
  *
  * Returns:
