@@ -61,12 +61,12 @@
 
 /* Camera geometry */
 #define CAMERA_PIXELS           128
-#define CAMERA_CENTER           64.0f     // ideal centroid
-#define CENTER_DEADBAND         3.0f      // acceptable error before slowing
+#define CAMERA_CENTER           58.0f     // ideal centroid (accounting for off centered camera)
+#define CENTER_DEADBAND         1.0f      // acceptable error before slowing
 
 /* Filtering */
 #define FILTER_WINDOW           5         // moving-average window
-#define NO_TRACK_LIMIT          6         // watchdog threshold (frames)
+#define NO_TRACK_LIMIT          15         // watchdog threshold (frames)
 
 /* PID gains (tuned for hybrid control) */
 #define KP  0.020f
@@ -76,10 +76,10 @@
 /* Servo PWM (TIMA1) */
 #define SERVO_PERIOD_TICKS      640 
 #define SERVO_CH                0
-#define SERVO_MIN_US            180.0f   // full left
-#define SERVO_CENTER_US         90.0f    // straight/init
-#define SERVO_MAX_US            0.0f     // full right
-#define STEARING_RAMP           0.07f    // smooth stearing
+#define SERVO_MIN_US            25.0f   // full left
+#define SERVO_CENTER_US         90.0f   // straight/init
+#define SERVO_MAX_US            155.0f  // full right
+#define STEARING_RAMP           3.5f    // smooth stearing
 
 /* Motor PWM (TIMA0) */
 #define MOTOR_PERIOD_TICKS      3200    
@@ -88,16 +88,16 @@
 
 /* Throttle rules */
 #define INIT_THROTTLE           0.00f
-#define MAX_THROTTLE            0.50f     // never exceed 50%
-#define TURN_THROTTLE           0.30f     // slowest throttle when steering
-#define THROTTLE_RAMP           0.03f     // smooth acceleration/deceleration
+#define MAX_THROTTLE            0.38f     // never exceed 50%
+#define TURN_THROTTLE           0.25f     // slowest throttle when steering
+#define THROTTLE_RAMP           0.025f     // smooth acceleration/deceleration
 
 /* Differential steering scaling */
 #define DIFF_SCALE              0.02f     // PID ? torque split
 #define DIFF_MAX                0.20f     // ±20% torque redistribution (max variance in motor assisted turning)
 
 /* Thresholding */
-#define THRESH_FACTOR           0.55f     // adaptive threshold factor (to account for different light levels)
+#define THRESH_FACTOR           0.60f     // adaptive threshold factor (to account for different light levels)
 
 /* Motor Controller Enable (CAN'T FIND THE DUMB MACRO)*/
 #define LEFT_EN_MASK   (1U << 19)         // PB19
@@ -264,7 +264,7 @@ int main(void) {
 	
 		int angle = SERVO_CENTER_US;
 		int no_track = 0;
-	  float throttle = 0.0;
+	  float throttle = TURN_THROTTLE;
 	  uint8_t bin[CAMERA_PIXELS];
 	
 		/* Camera/ADC Init */
@@ -282,7 +282,7 @@ int main(void) {
     TIMA1_PWM_init(SERVO_CH, SERVO_PERIOD_TICKS, 0, servo_angle_to_duty(SERVO_CENTER_US));
 		
 		/* small 5s delay before starting to run the car */
-		for(volatile int i = 0; i < 500; i++) {
+		for(volatile int i = 0; i < 50; i++) {
 			delay_10ms();
 		}
 		
@@ -294,7 +294,7 @@ int main(void) {
 	  while(1){
             /* Wait for camera frame */
             if (!Camera_isDataReady()) {
-							delay_10ms();
+							delay_1ms();
             }
 						
 						/* Retrieves camera data */
@@ -304,8 +304,8 @@ int main(void) {
             int cen = compute_centroid(raw, bin);
 						
 						/* Check if centroid is centered accounting for deadband */
-						if (cen<CAMERA_CENTER+CENTER_DEADBAND && cen>CAMERA_CENTER-CENTER_DEADBAND) {
-							/* If car not centered, so slow down dc motors */
+						if (cen>CAMERA_CENTER-CENTER_DEADBAND && cen<CAMERA_CENTER+CENTER_DEADBAND) {
+							/* If car centered, speed up dc motors */
 							if (throttle < MAX_THROTTLE) {throttle = throttle+THROTTLE_RAMP;}
 							TIMA0_PWM_DutyCycle(LEFT_CH, throttle);   
 							TIMA0_PWM_DutyCycle(RIGHT_CH, throttle);   
@@ -337,12 +337,13 @@ int main(void) {
 						}
 						
 						/* Track end/carpet stop check, checks if NO_TRACK_LIMIT number of consecutive frames logged had no track data*/
-						if (cen < 0) {
+						if (cen == 0) {
 							no_track++;
 							if (no_track>NO_TRACK_LIMIT) {
 								/* Track has ended or been lost, end/idle program */
 								TIMA0_PWM_DutyCycle(LEFT_CH, INIT_THROTTLE);   
 						   	TIMA0_PWM_DutyCycle(RIGHT_CH, INIT_THROTTLE);  
+								TIMA1_PWM_DutyCycle(SERVO_CH, servo_angle_to_duty(SERVO_CENTER_US));
 								break;
 						  }
 							
@@ -350,7 +351,6 @@ int main(void) {
 							no_track = 0; 
 						}
 
-						delay_1ms();
 		}
 		
 }
