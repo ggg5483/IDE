@@ -77,8 +77,9 @@
 #define SERVO_PERIOD_TICKS      640 
 #define SERVO_CH                0
 #define SERVO_MIN_US            180.0f   // full left
-#define SERVO_CENTER_US         90.0f   // straight
-#define SERVO_MAX_US            0.0f   // full right
+#define SERVO_CENTER_US         90.0f    // straight/init
+#define SERVO_MAX_US            0.0f     // full right
+#define STEARING_RAMP           0.07f    // smooth stearing
 
 /* Motor PWM (TIMA0) */
 #define MOTOR_PERIOD_TICKS      3200    
@@ -88,8 +89,8 @@
 /* Throttle rules */
 #define INIT_THROTTLE           0.00f
 #define MAX_THROTTLE            0.50f     // never exceed 50%
-#define TURN_THROTTLE           0.30f     // slow throttle when steering
-#define THROTTLE_RAMP           0.07f    // smooth acceleration/deceleration
+#define TURN_THROTTLE           0.30f     // slowest throttle when steering
+#define THROTTLE_RAMP           0.03f     // smooth acceleration/deceleration
 
 /* Differential steering scaling */
 #define DIFF_SCALE              0.02f     // PID ? torque split
@@ -263,6 +264,7 @@ int main(void) {
 	
 		int angle = SERVO_CENTER_US;
 		int no_track = 0;
+	  float throttle = 0.0;
 	  uint8_t bin[CAMERA_PIXELS];
 	
 		/* Camera/ADC Init */
@@ -303,27 +305,30 @@ int main(void) {
 						
 						/* Check if centroid is centered accounting for deadband */
 						if (cen<CAMERA_CENTER+CENTER_DEADBAND && cen>CAMERA_CENTER-CENTER_DEADBAND) {
-							TIMA0_PWM_DutyCycle(LEFT_CH, MAX_THROTTLE);   
-							TIMA0_PWM_DutyCycle(RIGHT_CH, MAX_THROTTLE);   
-							TIMA1_PWM_DutyCycle(SERVO_CH, servo_angle_to_duty(angle));
+							if (throttle < MAX_THROTTLE) {throttle = throttle+THROTTLE_RAMP;}
+							TIMA0_PWM_DutyCycle(LEFT_CH, throttle);   
+							TIMA0_PWM_DutyCycle(RIGHT_CH, throttle);   
+							TIMA1_PWM_DutyCycle(SERVO_CH, servo_angle_to_duty(SERVO_CENTER_US));
+						} else {
+							throttle = throttle-THROTTLE_RAMP;
 						}
 						
 						/* Check if right turn */
 						/* If so slow down dc motors, and turn servos right */
             if (cen>CAMERA_CENTER+CENTER_DEADBAND) {
-							TIMA0_PWM_DutyCycle(LEFT_CH, TURN_THROTTLE);   
-							TIMA0_PWM_DutyCycle(RIGHT_CH, TURN_THROTTLE);   
-							angle = angle-THROTTLE_RAMP;
-							if (angle < SERVO_MIN_US) {angle=SERVO_MIN_US;};
+							TIMA0_PWM_DutyCycle(LEFT_CH, throttle);   
+							TIMA0_PWM_DutyCycle(RIGHT_CH, throttle);   
+							angle = angle-STEARING_RAMP;
+							if (angle < SERVO_MIN_US) {angle=SERVO_MIN_US;}
 							TIMA1_PWM_DutyCycle(SERVO_CH, servo_angle_to_duty(angle));
 						}
 						
 						/* Check if left turn */
 						/* If so slow down dc motors, and turn servos left */
 						if (cen<CAMERA_CENTER-CENTER_DEADBAND) {
-							TIMA0_PWM_DutyCycle(LEFT_CH, TURN_THROTTLE);   
-							TIMA0_PWM_DutyCycle(RIGHT_CH, TURN_THROTTLE);   
-							angle = angle+THROTTLE_RAMP;
+							TIMA0_PWM_DutyCycle(LEFT_CH, throttle);   
+							TIMA0_PWM_DutyCycle(RIGHT_CH, throttle);   
+							angle = angle+STEARING_RAMP;
 							if (angle > SERVO_MAX_US) {angle=SERVO_MAX_US;}
               TIMA1_PWM_DutyCycle(SERVO_CH, servo_angle_to_duty(angle));
 						}
