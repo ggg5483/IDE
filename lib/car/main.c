@@ -314,6 +314,7 @@ int main(void) {
 							throttle = throttle-(throttle-TURN_THROTTLE);
 						} else {
 							throttle = throttle-THROTTLE_RAMP;
+						}
 						
 						/* Check if right turn */
 						/* If so turn servos right */
