@@ -305,6 +305,7 @@ int main(void) {
 						
 						/* Check if centroid is centered accounting for deadband */
 						if (cen<CAMERA_CENTER+CENTER_DEADBAND && cen>CAMERA_CENTER-CENTER_DEADBAND) {
+							/* If car not centered, so slow down dc motors */
 							if (throttle < MAX_THROTTLE) {throttle = throttle+THROTTLE_RAMP;}
 							TIMA0_PWM_DutyCycle(LEFT_CH, throttle);   
 							TIMA0_PWM_DutyCycle(RIGHT_CH, throttle);   
@@ -315,7 +316,7 @@ int main(void) {
 							throttle = throttle-THROTTLE_RAMP;
 						
 						/* Check if right turn */
-						/* If so slow down dc motors, and turn servos right */
+						/* If so turn servos right */
             if (cen>CAMERA_CENTER+CENTER_DEADBAND) {
 							TIMA0_PWM_DutyCycle(LEFT_CH, throttle);   
 							TIMA0_PWM_DutyCycle(RIGHT_CH, throttle);   
@@ -325,7 +326,7 @@ int main(void) {
 						}
 						
 						/* Check if left turn */
-						/* If so slow down dc motors, and turn servos left */
+						/* If so turn servos left */
 						if (cen<CAMERA_CENTER-CENTER_DEADBAND) {
 							TIMA0_PWM_DutyCycle(LEFT_CH, throttle);   
 							TIMA0_PWM_DutyCycle(RIGHT_CH, throttle);   
