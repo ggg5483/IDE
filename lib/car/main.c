@@ -96,7 +96,7 @@
 #define DIFF_MAX                0.20f     // ±20% torque redistribution (max variance in motor assisted turning)
 
 /* Thresholding */
-#define THRESH_FACTOR           0.55f     // adaptive threshold factor (to account for wiggly track will need to be adjusted for intersections)
+#define THRESH_FACTOR           0.55f     // adaptive threshold factor (to account for different light levels)
 
 /* Motor Controller Enable (CAN'T FIND THE DUMB MACRO)*/
 #define LEFT_EN_MASK   (1U << 19)         // PB19
@@ -337,12 +337,14 @@ int main(void) {
 						   	TIMA0_PWM_DutyCycle(RIGHT_CH, INIT_THROTTLE);  
 								break;
 						  }
+							
 						} else { 
 							no_track = 0; 
 						}
 
 						delay_1ms();
 		}
+		
 }
 
 
