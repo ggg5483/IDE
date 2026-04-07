@@ -74,12 +74,11 @@
 #define KD  0.001f
 
 /* Servo PWM (TIMA1) */
-#define SERVO_PERIOD_TICKS      640 // 50 Hz PWM
+#define SERVO_PERIOD_TICKS      640 
 #define SERVO_CH                0
 #define SERVO_MIN_US            180.0f   // full left
 #define SERVO_CENTER_US         90.0f   // straight
 #define SERVO_MAX_US            0.0f   // full right
-#define SERVO_PERIOD_US         20000.0f  // 20 ms period
 
 /* Motor PWM (TIMA0) */
 #define MOTOR_PERIOD_TICKS      3200    
@@ -87,9 +86,10 @@
 #define RIGHT_CH                2
 
 /* Throttle rules */
+#define INIT_THROTTLE           0.00f
 #define MAX_THROTTLE            0.50f     // never exceed 50%
-#define TURN_THROTTLE           0.20f     // slow throttle when steering
-#define THROTTLE_RAMP           0.005f    // smooth acceleration/deceleration
+#define TURN_THROTTLE           0.30f     // slow throttle when steering
+#define THROTTLE_RAMP           0.07f    // smooth acceleration/deceleration
 
 /* Differential steering scaling */
 #define DIFF_SCALE              0.02f     // PID ? torque split
@@ -101,28 +101,6 @@
 /* Motor Controller Enable (CAN'T FIND THE DUMB MACRO)*/
 #define LEFT_EN_MASK   (1U << 19)         // PB19
 #define RIGHT_EN_MASK  (1U << 22)         // PA22
-
-
-/* ============================================================
- *                     UTILITY FUNCTIONS
- * ============================================================ */
-
-/**
- * Smoothly move a value toward a target by a fixed step.
- * Used for throttle and servo smoothing.
- */
-static float ramp(float cur, float tgt, float step) {
-    if (cur < tgt) { cur += step; if (cur > tgt) cur = tgt; }
-    else if (cur > tgt) { cur -= step; if (cur < tgt) cur = tgt; }
-    return cur;
-}
-
-/**
- * Convert a servo pulse width (microseconds) into a PWM duty fraction.
- */
-static float pulse_to_frac(float us) {
-    return us / SERVO_PERIOD_US;
-}
 
 /* ============================================================
  *                CAMERA CENTROID + THRESHOLDING
@@ -172,70 +150,103 @@ static int compute_centroid(uint16_t *raw, uint8_t bin[128]) {
  *                MOVING-AVERAGE FILTER FOR CENTROID
  * ============================================================ */
 
-typedef struct {
-    int buf[FILTER_WINDOW];
-    int idx, count;
-} CentroidFilter;
+//typedef struct {
+//    int buf[FILTER_WINDOW];
+//    int idx, count;
+//} CentroidFilter;
 
-/** Initialize filter buffer */
-static void cf_init(CentroidFilter *f) {
-    for (int i = 0; i < FILTER_WINDOW; i++) f->buf[i] = -1;
-    f->idx = 0;
-    f->count = 0;
-}
+///** Initialize filter buffer */
+//static void cf_init(CentroidFilter *f) {
+//    for (int i = 0; i < FILTER_WINDOW; i++) f->buf[i] = -1;
+//    f->idx = 0;
+//    f->count = 0;
+//}
 
-/** Push new centroid value into filter */
-static void cf_push(CentroidFilter *f, int v) {
-    f->buf[f->idx] = v;
-    f->idx = (f->idx + 1) % FILTER_WINDOW;
-    if (f->count < FILTER_WINDOW) f->count++;
-}
+///** Push new centroid value into filter */
+//static void cf_push(CentroidFilter *f, int v) {
+//    f->buf[f->idx] = v;
+//    f->idx = (f->idx + 1) % FILTER_WINDOW;
+//    if (f->count < FILTER_WINDOW) f->count++;
+//}
 
-/** Compute filtered centroid (ignoring -1 entries) */
-static float cf_get(CentroidFilter *f) {
-    int sum = 0, n = 0;
-    for (int i = 0; i < FILTER_WINDOW; i++) {
-        if (f->buf[i] >= 0) {
-            sum += f->buf[i];
-            n++;
-        }
-    }
-    return (n == 0) ? -1.0f : (float)sum / n;
-}
+///** Compute filtered centroid (ignoring -1 entries) */
+//static float cf_get(CentroidFilter *f) {
+//    int sum = 0, n = 0;
+//    for (int i = 0; i < FILTER_WINDOW; i++) {
+//        if (f->buf[i] >= 0) {
+//            sum += f->buf[i];
+//            n++;
+//        }
+//    }
+//    return (n == 0) ? -1.0f : (float)sum / n;
+//}
 
 
 /* ============================================================
  *                          MAIN LOOP
  * ============================================================ */
 
-/* Small busy delay used for ms waits */
-static void busy_delay_ms(uint32_t ms) {
-    volatile uint32_t outer = ms;
-    while (outer--) {
-        volatile uint32_t inner = 12000U; // approximate inner loop for ~1ms; adjust if needed
-        while (inner--) __asm__("nop");
-    }
-}
+///* Small busy delay used for ms waits */
+//static void busy_delay_ms(uint32_t ms) {
+//    volatile uint32_t outer = ms;
+//    while (outer--) {
+//        volatile uint32_t inner = 12000U; // approximate inner loop for ~1ms; adjust if needed
+//        while (inner--) __asm__("nop");
+//    }
+//}
 
-/* Debounced read of S1 (active-high). Returns 1 if pressed (stable). */
-static int read_start_button_debounced(void) {
-    if (!S1_pressed()) return 0;
-    busy_delay_ms(50);
-    return S1_pressed() ? 1 : 0;
-}
+///* Debounced read of S1 (active-high). Returns 1 if pressed (stable). */
+//static int read_start_button_debounced(void) {
+//    if (!S1_pressed()) return 0;
+//    busy_delay_ms(50);
+//    return S1_pressed() ? 1 : 0;
+//}
 
-/* Wait until S1 is pressed (blocking). Returns after a stable press is detected. */
-static void wait_for_start_press(void) {
-    while (1) {
-        if (read_start_button_debounced()) {
-            return;
-        }
-        busy_delay_ms(10);
+///* Wait until S1 is pressed (blocking). Returns after a stable press is detected. */
+//static void wait_for_start_press(void) {
+//    while (1) {
+//        if (read_start_button_debounced()) {
+//            return;
+//        }
+//        busy_delay_ms(10);
+//    }
+//}
+
+static void DC_ENABLE(void){
+	if ((GPIOB->GPRCM.PWREN & GPIO_PWREN_ENABLE_MASK) == 0U) {
+        GPIOB->GPRCM.RSTCTL = GPIO_RSTCTL_RESETASSERT_ASSERT |
+                              GPIO_RSTCTL_KEY_UNLOCK_W |
+                              GPIO_RSTCTL_RESETSTKYCLR_CLR;
+        GPIOB->GPRCM.PWREN  = GPIO_PWREN_ENABLE_MASK |
+                              GPIO_PWREN_KEY_UNLOCK_W;
     }
+
+    // Power on GPIOA if needed
+    if ((GPIOA->GPRCM.PWREN & GPIO_PWREN_ENABLE_MASK) == 0U) {
+        GPIOA->GPRCM.RSTCTL = GPIO_RSTCTL_RESETASSERT_ASSERT |
+                              GPIO_RSTCTL_KEY_UNLOCK_W |
+                              GPIO_RSTCTL_RESETSTKYCLR_CLR;
+        GPIOA->GPRCM.PWREN  = GPIO_PWREN_ENABLE_MASK |
+                              GPIO_PWREN_KEY_UNLOCK_W;
+    }
+
+    // Configure PB19 as GPIO output (L DC ENABLE)
+    IOMUX->SECCFG.PINCM[IOMUX_PINCM45] |= (1U | IOMUX_PINCM_PC_CONNECTED);   // PB19 = pincm45
+    GPIOB->DOESET31_0 |= LEFT_EN_MASK;   // enable output driver
+    GPIOB->DOUTSET31_0 = LEFT_EN_MASK;   // drive HIGH
+
+    // Configure PA22 as GPIO output (R DC ENABLE)
+    IOMUX->SECCFG.PINCM[IOMUX_PINCM47] |= (1U | IOMUX_PINCM_PC_CONNECTED);   // PA22 = PINCM47
+    GPIOA->DOESET31_0 |= RIGHT_EN_MASK;  // enable output driver
+    GPIOA->DOUTSET31_0 = RIGHT_EN_MASK;  // drive HIGH
 }
 
 static void delay_10ms(void){
     for(volatile int i = 0; i < 100000; i++){}
+}
+
+static void delay_1ms(void){
+    for(volatile int i = 0; i < 10000; i++){}
 }
 
 // Convert angle (0–180°) to duty cycle for a 1–2 ms pulse
@@ -246,79 +257,97 @@ double servo_angle_to_duty(int angle){
     return pulse / 0.020;      // divide by 20 ms period
 }
 
+
+
 int main(void) {
 	
+		int angle = SERVO_CENTER_US;
+		int no_track = 0;
+	  uint8_t bin[CAMERA_PIXELS];
+	
+		/* Camera/ADC Init */
     ADC0_init();
   	Camera_init();
 
-    /* Motor PWM (TIMA0) */
-    TIMA0_PWM_init(LEFT_CH, MOTOR_PERIOD_TICKS, 0, 0.0);
-    TIMA0_PWM_init(RIGHT_CH, MOTOR_PERIOD_TICKS, 0, 0.0);
+    /* DC Init */
+    TIMA0_PWM_init(LEFT_CH, MOTOR_PERIOD_TICKS, 0, INIT_THROTTLE );
+    TIMA0_PWM_init(RIGHT_CH, MOTOR_PERIOD_TICKS, 0, INIT_THROTTLE );
 	
-    // SERVO
-  	// 20 ms period = 640 counts at 32 kHz
-    TIMA1_PWM_init(0, 640, 0, servo_angle_to_duty(90));
-	  int angle = 90;
-	  uint8_t bin[128];
+		/* Enable DC motors */
+		DC_ENABLE();
 	
+    /* SERVO Init */
+    TIMA1_PWM_init(SERVO_CH, SERVO_PERIOD_TICKS, 0, servo_angle_to_duty(SERVO_CENTER_US));
+		
+		/* small 5s delay before starting to run the car */
+		for(volatile int i = 0; i < 500; i++) {
+			delay_10ms();
+		}
+		
+		/* start motors */
+		TIMA0_PWM_DutyCycle(LEFT_CH, TURN_THROTTLE);   
+    TIMA0_PWM_DutyCycle(RIGHT_CH, TURN_THROTTLE);
+	
+		/* start stearing loop */
+	  while(1){
             /* Wait for camera frame */
             if (!Camera_isDataReady()) {
-                busy_delay_ms(1);
+							delay_10ms();
             }
+						
+						/* Retrieves camera data */
             uint16_t *raw = Camera_getData();
 
             /* Compute centroid */
             int cen = compute_centroid(raw, bin);
-
-						if (cen==64) {
-							double duty = 0.5;
-            TIMA0_PWM_DutyCycle(0, duty);   
-            TIMA0_PWM_DutyCycle(2, duty);   
-            TIMA1_PWM_init(0, 640, 0, servo_angle_to_duty(angle));
-
-            delay_10ms();
+						
+						/* Check if centroid is centered accounting for deadband */
+						if (cen<CAMERA_CENTER+CENTER_DEADBAND && cen>CAMERA_CENTER-CENTER_DEADBAND) {
+							TIMA0_PWM_DutyCycle(LEFT_CH, MAX_THROTTLE);   
+							TIMA0_PWM_DutyCycle(RIGHT_CH, MAX_THROTTLE);   
+							TIMA1_PWM_DutyCycle(SERVO_CH, servo_angle_to_duty(angle));
 						}
 						
-            if (cen>64) {
-							double duty = 0.2;
-            TIMA0_PWM_DutyCycle(0, duty);   
-            TIMA0_PWM_DutyCycle(2, duty);   
-            for(int i = cen; i > 64; i--){
-									angle = angle-3;
-                  TIMA1_PWM_init(0, 640, 0, servo_angle_to_duty(angle));
-
-            delay_10ms();
-								}
+						/* Check if right turn */
+						/* If so slow down dc motors, and turn servos right */
+            if (cen>CAMERA_CENTER+CENTER_DEADBAND) {
+							TIMA0_PWM_DutyCycle(LEFT_CH, TURN_THROTTLE);   
+							TIMA0_PWM_DutyCycle(RIGHT_CH, TURN_THROTTLE);   
+							angle = angle-THROTTLE_RAMP;
+							if (angle < SERVO_MIN_US) {angle=SERVO_MIN_US;};
+							TIMA1_PWM_DutyCycle(SERVO_CH, servo_angle_to_duty(angle));
 						}
 						
-						if (cen<64) {
-							double duty = 0.2;
-            TIMA0_PWM_DutyCycle(0, duty);   
-            TIMA0_PWM_DutyCycle(2, duty);   
-            for(int i = cen; i < 64; i++){
-									angle = angle+3;
-                  TIMA1_PWM_init(0, 640, 0, servo_angle_to_duty(angle));
-
-            delay_10ms();
-								}
+						/* Check if left turn */
+						/* If so slow down dc motors, and turn servos left */
+						if (cen<CAMERA_CENTER-CENTER_DEADBAND) {
+							TIMA0_PWM_DutyCycle(LEFT_CH, TURN_THROTTLE);   
+							TIMA0_PWM_DutyCycle(RIGHT_CH, TURN_THROTTLE);   
+							angle = angle+THROTTLE_RAMP;
+							if (angle > SERVO_MAX_US) {angle=SERVO_MAX_US;}
+              TIMA1_PWM_DutyCycle(SERVO_CH, servo_angle_to_duty(angle));
+						}
+						
+						/* Track end/carpet stop check, checks if NO_TRACK_LIMIT number of consecutive frames logged had no track data*/
+						if (cen < 0) {
+							no_track++;
+							if (no_track>NO_TRACK_LIMIT) {
+								/* Track has ended or been lost, end/idle program */
+								TIMA0_PWM_DutyCycle(LEFT_CH, INIT_THROTTLE);   
+						   	TIMA0_PWM_DutyCycle(RIGHT_CH, INIT_THROTTLE);  
+								break;
+						  }
+						} else { 
+							no_track = 0; 
 						}
 
+						delay_1ms();
+		}
+}
 
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
+
 
 //    /* ---------- Initialize subsystems ---------- */
 
