@@ -309,9 +309,10 @@ int main(void) {
 							TIMA0_PWM_DutyCycle(LEFT_CH, throttle);   
 							TIMA0_PWM_DutyCycle(RIGHT_CH, throttle);   
 							TIMA1_PWM_DutyCycle(SERVO_CH, servo_angle_to_duty(SERVO_CENTER_US));
+						} else if (throttle < TURN_THROTTLE+THROTTLE_RAMP) {
+							throttle = throttle-(throttle-TURN_THROTTLE);
 						} else {
 							throttle = throttle-THROTTLE_RAMP;
-						}
 						
 						/* Check if right turn */
 						/* If so slow down dc motors, and turn servos right */
