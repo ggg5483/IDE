@@ -60,6 +60,8 @@ int main(void)
 	
 	  UART0_put("\e[2J\e[H");
 	  UART0_put("\e[48;5;231m\e[38;5;232m"); // background white, text dark
+	
+	  uint32_t adcVal = ADC0_getVal();
 
     while (1) {
         __WFI();   /* Sleep until interrupt */

@@ -61,7 +61,7 @@
 
 /* Camera geometry */
 #define CAMERA_PIXELS           128
-#define CAMERA_CENTER           58.0f     // ideal centroid (accounting for off centered camera)
+#define CAMERA_CENTER           60.0f     // ideal centroid (accounting for off centered camera)
 #define CENTER_DEADBAND         1.0f      // acceptable error before slowing
 
 /* Filtering */
@@ -76,10 +76,10 @@
 /* Servo PWM (TIMA1) */
 #define SERVO_PERIOD_TICKS      640 
 #define SERVO_CH                0
-#define SERVO_MIN_US            25.0f   // full left
+#define SERVO_MIN_US            15.0f   // full left
 #define SERVO_CENTER_US         90.0f   // straight/init
-#define SERVO_MAX_US            155.0f  // full right
-#define STEARING_RAMP           4.5f    // smooth stearing
+#define SERVO_MAX_US            165.0f  // full right
+#define STEARING_RAMP           0.5f    // smooth stearing
 
 /* Motor PWM (TIMA0) */
 #define MOTOR_PERIOD_TICKS      3200    
@@ -88,9 +88,9 @@
 
 /* Throttle rules */
 #define INIT_THROTTLE           0.00f
-#define MAX_THROTTLE            0.38f     // never exceed 50%
-#define TURN_THROTTLE           0.24f     // slowest throttle when steering
-#define THROTTLE_RAMP           0.02f     // smooth acceleration/deceleration
+#define MAX_THROTTLE            0.45f     // never exceed 50%
+#define TURN_THROTTLE           0.35f     // slowest throttle when steering
+#define THROTTLE_RAMP           0.01f     // smooth acceleration/deceleration
 
 /* Differential steering scaling */
 #define DIFF_SCALE              0.02f     // PID ? torque split
