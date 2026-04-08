@@ -11,73 +11,122 @@
 */
 
 #include <ti/devices/msp/msp.h>
-#include "timers.h"
+#include "lab8/timers.h"
 #include "uart_extras.h"
-#include "adc12.h"
-#include "uart.h"
+#include "lab8/adc12.h"
+#include "lab8/uart.h"
+#include <stdint.h>
+#include <stdbool.h>
 
-/**
-* @brief turn a 32 bit unsigned number into string decimal representation
-* @param buf should be size 11 for max 32 bit number
-*/
-void hex_to_dec(uint32_t val, char *buf){
-	//zero case
-	if(val == 0){
-		buf[0] = '0';
-		buf[1] = '\0';
-		return;
-	}
-	
-	//intereperet from lsb
-	int i = 0;
-	buf[0] = '\0';
-	while(val > 0){
-		buf[i++] = '0' + val % 10;
-		val = val/10;
-	} // while
-	
-	//reverse string
-	for(int j = 0; j <i/2; j++){
-		char temp = buf[j];
-		buf[j] = buf[i - 1 - j];
-		buf[i - 1 - j] = temp;
-	}
+/* Configuration */
+#define SAMPLE_RATE_HZ        200U                   /* ISR sampling frequency (Hz) */
+#define WINDOW_SAMPLES        (SAMPLE_RATE_HZ / 10U) /* 0.1s window -> SAMPLE_RATE_HZ * 0.1 */
+#define MIN_PEAK_SEP_MS       40U                    /* ignore peaks closer than this (ms) */
+#define TIMER_CLOCK_HZ        80000000U              /* timer input clock for TIMG6_init */
+#define SCALE_TO_BPM          600U                   /* 60 / 0.1 = 600 */
+ 
+/* compile-time sanity checks */
+#if WINDOW_SAMPLES < 1 || WINDOW_SAMPLES > 256
+#error "WINDOW_SAMPLES must be between 1 and 256"
+#endif
+
+/* Forward declaration for ISR to avoid missing-prototype warning */
+void TIMG6_IRQHandler(void);
+
+/* Circular buffer to hold the most recent WINDOW_SAMPLES ADC values */
+static uint16_t buf[WINDOW_SAMPLES];
+static uint32_t head = 0;            /* index of oldest sample in buffer */
+static uint32_t count = 0;           /* number of samples currently in buffer */
+
+/* Peak detection state */
+static uint16_t prev = 0;            /* previous ADC sample */
+static bool rising = false;          /* whether signal was rising */
+static uint32_t lastPeakIdx = 0;     /* sample index of last detected peak */
+static uint32_t idx = 0;             /* running sample index */
+static uint32_t peaks = 0;           /* peaks counted in current window */
+static uint16_t winMax = 0;          /* running max in window */
+static uint16_t winMin = 0x0FFF;     /* running min in window */
+
+/* Push a new sample into the circular window buffer and update min/max */
+static void push(uint16_t v){
+    if (count < WINDOW_SAMPLES){
+        buf[(head + count) % WINDOW_SAMPLES] = v;
+        count++;
+    } else {
+        buf[head] = v;
+        head = (head + 1) % WINDOW_SAMPLES;
+    }
+    if (v > winMax) winMax = v;
+    if (v < winMin) winMin = v;
 }
 
-/**
- * Lab 5 – Part 2: ADC + Timer + UART
- */
 int main(void)
 {
-    /* Initialize UART0 for printing */
-    UART0_init();
-		
-		//TIMG0_init(0xFFFF, 0);
-		TIMG6_init(16000, 0);
+    UART0_init(); /* enable UART for printing */
 
-    /* Initialize ADC0 (channel 0 ? MEMRES0) */
-    ADC0_init();
-	
-	  UART0_put("\e[2J\e[H");
-	  UART0_put("\e[48;5;231m\e[38;5;232m"); // background white, text dark
-	
-	  uint32_t adcVal = ADC0_getVal();
+    /* compute timer period to achieve SAMPLE_RATE_HZ and start TIMG6 */
+    uint32_t period = TIMER_CLOCK_HZ / SAMPLE_RATE_HZ;
+    if (period == 0) period = 1;
+    TIMG6_init(period, 0);
 
-    while (1) {
-        __WFI();   /* Sleep until interrupt */
-    }
+    ADC0_init(); /* initialize ADC0 */
+
+    /* seed previous sample and window with one reading */
+    prev = (uint16_t)(ADC0_getVal() & 0x0FFF);
+    push(prev);
+
+    /* main loop sleeps; work happens in TIMG6 ISR */
+    while (1) __WFI();
 }
 
 void TIMG6_IRQHandler(void){
-    /* Clear timer interrupt */
+    /* clear timer interrupt */
     TIMG6->CPU_INT.ICLR = GPTIMER_CPU_INT_ICLR_Z_CLR;
 
-    /* Trigger ADC conversion and read value */
-    uint32_t adcVal = ADC0_getVal();
+    /* read ADC (12-bit) */
+    uint16_t sample = (uint16_t)(ADC0_getVal() & 0x0FFF);
 
-    /* Print decimal */
-    UART0_put("ADC (dec): ");
-    UART0_printDec(adcVal);
-    UART0_put("   \r\n");
+    /* add to sliding window and update min/max */
+    push(sample);
 
-	}
+    /* threshold = midpoint between window max and min (very simple) */
+    uint16_t threshold = (uint16_t)(((uint32_t)winMax + (uint32_t)winMin) / 2U);
+
+    /* minimum separation between peaks in samples to avoid double-counting */
+    uint32_t minSepSamples = (SAMPLE_RATE_HZ * MIN_PEAK_SEP_MS) / 1000U;
+
+    /* detect a local maximum: previously rising and now falling */
+    if (sample > prev) {
+        rising = true;
+    } else if (rising && sample < prev) {
+        uint32_t sinceLast = idx - lastPeakIdx;
+        /* count peak only if it exceeds threshold and is sufficiently separated */
+        if (prev > threshold && sinceLast >= minSepSamples) {
+            peaks++;
+            lastPeakIdx = idx;
+        }
+        rising = false;
+    }
+
+    prev = sample;
+    idx++;
+
+    /* when we've collected WINDOW_SAMPLES samples, compute BPM and print */
+    if ((idx % WINDOW_SAMPLES) == 0) {
+        /* BPM = peaks * SCALE_TO_BPM (SCALE_TO_BPM = 60 / 0.1 = 600) */
+        uint32_t bpm = peaks * SCALE_TO_BPM;
+
+        /* print only the required output */
+        UART0_put("BPM: ");
+        UART0_printDec((int)bpm);
+        UART0_put("\r\n");
+
+        /* reset counters and window stats for next measurement window */
+        peaks = 0;
+        head = 0;
+        count = 0;
+        winMax = 0;
+        winMin = 0x0FFF;
+        lastPeakIdx = idx;
+    }
+}

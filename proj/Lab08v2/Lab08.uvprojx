@@ -10,6 +10,7 @@
       <TargetName>Target 1</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
+      <pCCUsed>6140000::V6.14::ARMCLANG</pCCUsed>
       <uAC6>1</uAC6>
       <TargetOption>
         <TargetCommonOption>
@@ -335,10 +336,10 @@
             <v6WtE>0</v6WtE>
             <v6Rtti>0</v6Rtti>
             <VariousControls>
-              <MiscControls>..\..\lib</MiscControls>
+              <MiscControls></MiscControls>
               <Define>__MSPM0G3507__</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\source</IncludePath>
+              <IncludePath>..\..\source;..\..\lib</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -369,7 +370,7 @@
             <TextAddressRange>0x00000000</TextAddressRange>
             <DataAddressRange>0x20000000</DataAddressRange>
             <pXoBase></pXoBase>
-            <ScatterFile>..\..\source\ti\devices\msp\m0p\startup_system_files\keil\startup_mspm0g350x_uvision.s</ScatterFile>
+            <ScatterFile>..\..\source\ti\devices\msp\m0p\linker_files\keil\mspm0g3507.sct</ScatterFile>
             <IncludeLibs></IncludeLibs>
             <IncludeLibsPath></IncludeLibsPath>
             <Misc></Misc>
@@ -387,6 +388,11 @@
               <FileType>1</FileType>
               <FilePath>.\main.c</FilePath>
             </File>
+            <File>
+              <FileName>startup_mspm0g350x_uvision.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>..\..\source\ti\devices\msp\m0p\startup_system_files\keil\startup_mspm0g350x_uvision.s</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -396,11 +402,6 @@
               <FileName>adc12.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\lib\lab8\adc12.c</FilePath>
-            </File>
-            <File>
-              <FileName>adc12.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\lib\lab8\adc12.h</FilePath>
             </File>
             <File>
               <FileName>timers.c</FileName>
@@ -431,6 +432,11 @@
               <FileName>uart_extras.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\..\lib\lab8\uart_extras.h</FilePath>
+            </File>
+            <File>
+              <FileName>adc12.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\lib\lab8\adc12.h</FilePath>
             </File>
           </Files>
         </Group>
