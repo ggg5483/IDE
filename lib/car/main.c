@@ -79,7 +79,7 @@
 #define SERVO_MIN_US            25.0f   // full left
 #define SERVO_CENTER_US         90.0f   // straight/init
 #define SERVO_MAX_US            155.0f  // full right
-#define STEARING_RAMP           3.5f    // smooth stearing
+#define STEARING_RAMP           4.5f    // smooth stearing
 
 /* Motor PWM (TIMA0) */
 #define MOTOR_PERIOD_TICKS      3200    
@@ -89,8 +89,8 @@
 /* Throttle rules */
 #define INIT_THROTTLE           0.00f
 #define MAX_THROTTLE            0.38f     // never exceed 50%
-#define TURN_THROTTLE           0.25f     // slowest throttle when steering
-#define THROTTLE_RAMP           0.025f     // smooth acceleration/deceleration
+#define TURN_THROTTLE           0.24f     // slowest throttle when steering
+#define THROTTLE_RAMP           0.02f     // smooth acceleration/deceleration
 
 /* Differential steering scaling */
 #define DIFF_SCALE              0.02f     // PID ? torque split

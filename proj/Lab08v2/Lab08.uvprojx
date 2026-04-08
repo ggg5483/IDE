@@ -335,7 +335,7 @@
             <v6WtE>0</v6WtE>
             <v6Rtti>0</v6Rtti>
             <VariousControls>
-              <MiscControls></MiscControls>
+              <MiscControls>..\..\lib</MiscControls>
               <Define>__MSPM0G3507__</Define>
               <Undefine></Undefine>
               <IncludePath>..\..\source</IncludePath>
@@ -369,7 +369,7 @@
             <TextAddressRange>0x00000000</TextAddressRange>
             <DataAddressRange>0x20000000</DataAddressRange>
             <pXoBase></pXoBase>
-            <ScatterFile>..\..\source\ti\devices\msp\m0p\linker_files\keil\mspm0g3507.sct</ScatterFile>
+            <ScatterFile>..\..\source\ti\devices\msp\m0p\startup_system_files\keil\startup_mspm0g350x_uvision.s</ScatterFile>
             <IncludeLibs></IncludeLibs>
             <IncludeLibsPath></IncludeLibsPath>
             <Misc></Misc>
@@ -383,49 +383,54 @@
           <GroupName>Source Group 1</GroupName>
           <Files>
             <File>
+              <FileName>main.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\main.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>lib</GroupName>
+          <Files>
+            <File>
               <FileName>adc12.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\lib\lab5\adc12.c</FilePath>
+              <FilePath>..\..\lib\lab8\adc12.c</FilePath>
             </File>
             <File>
               <FileName>adc12.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\..\lib\lab5\adc12.h</FilePath>
+              <FilePath>..\..\lib\lab8\adc12.h</FilePath>
             </File>
             <File>
               <FileName>timers.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\lib\lab5\timers.c</FilePath>
+              <FilePath>..\..\lib\lab8\timers.c</FilePath>
             </File>
             <File>
               <FileName>timers.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\..\lib\lab5\timers.h</FilePath>
-            </File>
-            <File>
-              <FileName>main.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\lib\lab5\main.c</FilePath>
+              <FilePath>..\..\lib\lab8\timers.h</FilePath>
             </File>
             <File>
               <FileName>uart.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\lib\lab2\uart.c</FilePath>
+              <FilePath>..\..\lib\lab8\uart.c</FilePath>
             </File>
             <File>
               <FileName>uart.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\..\lib\lab2\uart.h</FilePath>
+              <FilePath>..\..\lib\lab8\uart.h</FilePath>
             </File>
             <File>
               <FileName>uart_extras.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\lib\uart_extras.c</FilePath>
+              <FilePath>..\..\lib\lab8\uart_extras.c</FilePath>
             </File>
             <File>
               <FileName>uart_extras.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\..\lib\uart_extras.h</FilePath>
+              <FilePath>..\..\lib\lab8\uart_extras.h</FilePath>
             </File>
           </Files>
         </Group>

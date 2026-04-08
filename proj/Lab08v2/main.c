@@ -15,7 +15,6 @@
 #include "uart_extras.h"
 #include "adc12.h"
 #include "uart.h"
-#include "camera.h"
 
 /**
 * @brief turn a 32 bit unsigned number into string decimal representation
