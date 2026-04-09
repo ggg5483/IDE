@@ -21,11 +21,11 @@
 /* Configuration */
 #define SAMPLE_RATE_HZ        200U                   /* ISR sampling frequency (Hz) */
 #define WINDOW_SAMPLES        (SAMPLE_RATE_HZ / 10U) /* 0.1s window -> SAMPLE_RATE_HZ * 0.1 */
-#define MIN_PEAK_SEP_MS       40U                    /* ignore peaks closer than this (ms) */
+#define MIN_PEAK_SEP_MS       40U                    /* ignore peaks closer than this (ms) (avoid double counts) */
 #define TIMER_CLOCK_HZ        80000000U              /* timer input clock for TIMG6_init */
 #define SCALE_TO_BPM          600U                   /* 60 / 0.1 = 600 */
  
-/* compile-time sanity checks */
+/* compile-time allowed size check */
 #if WINDOW_SAMPLES < 1 || WINDOW_SAMPLES > 256
 #error "WINDOW_SAMPLES must be between 1 and 256"
 #endif
