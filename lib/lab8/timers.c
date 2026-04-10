@@ -82,7 +82,7 @@ void TIMG0_init(uint32_t period, uint32_t prescaler){
 
 // Use slow clock 32 kHz or bus clock 80 MHz
 #ifndef TIMG6_FAST
-#define TIMG6_FAST true
+#define TIMG6_FAST false
 #endif
 /**
  * @brief Timer G6 module initialization. General purpose timer

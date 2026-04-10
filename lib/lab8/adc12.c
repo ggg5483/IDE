@@ -20,6 +20,7 @@
 */
 void ADC0_init(void)
 {
+		//PA27
     /* Reset + power enable */
     if ((ADC0->ULLMEM.GPRCM.PWREN & ADC12_PWREN_ENABLE_MASK) == 0U) {
 
