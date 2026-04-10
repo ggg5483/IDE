@@ -14,7 +14,7 @@
 #include "timers.h"
 #include "uart_extras.h"
 #include "adc12.h"
-#include "uart.h"
+#include "lab2/uart.h"
 #include "camera.h"
 
 /**
