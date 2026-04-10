@@ -35,7 +35,7 @@
 
 /* Camera geometry */
 #define CAMERA_PIXELS           128
-#define CAMERA_CENTER           60.0f     // ideal centroid (accounting for off centered camera)
+#define CAMERA_CENTER           68.0f     // ideal centroid (accounting for off centered camera) increase if to the right of center, decrease if to the left of center
 #define CENTER_DEADBAND         3.0f      // acceptable error before slowing/turning (for intersection/wavy)
 
 /* Filtering */
