@@ -35,7 +35,7 @@
 
 /* Camera geometry */
 #define CAMERA_PIXELS           128
-#define CAMERA_CENTER           68.0f     // ideal centroid (accounting for off centered camera) increase if to the right of center, decrease if to the left of center
+#define CAMERA_CENTER           64.0f     // ideal centroid (accounting for off centered camera) increase if to the right of center, decrease if to the left of center (point camera slightly to the right)
 #define CENTER_DEADBAND         3.0f      // acceptable error before slowing/turning (for intersection/wavy)
 
 /* Filtering */
@@ -43,9 +43,9 @@
 #define NO_TRACK_LIMIT          10        // watchdog threshold (frames)
 
 /* PID gains (tuned for hybrid control) */
-#define KP  0.020f
-#define KI  0.0005f
-#define KD  0.001f
+#define KP  3.80f
+#define KI  0.00f
+#define KD  0.5f
 
 /* Servo PWM (TIMA1) */
 #define SERVO_PERIOD_TICKS      640 
@@ -62,9 +62,9 @@
 
 /* Throttle rules */
 #define INIT_THROTTLE           0.00f
-#define MAX_THROTTLE            0.45f     // never exceed 50%
-#define TURN_THROTTLE           0.30f     // slowest throttle when steering
-#define THROTTLE_RAMP_UP        0.005f    // smooth acceleration/deceleration
+#define MAX_THROTTLE            0.36f     // never exceed 50%
+#define TURN_THROTTLE           0.26f     // slowest throttle when steering
+#define THROTTLE_RAMP_UP        0.0015f    // smooth acceleration/deceleration
 #define THROTTLE_RAMP_DOWN      0.05f     // smooth acceleration/deceleration
 
 /* Differential steering scaling */

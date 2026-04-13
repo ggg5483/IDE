@@ -20,12 +20,12 @@
 
 /* Configuration */
 #define SAMPLE_RATE_HZ        1000U                   /* ISR sampling frequency (Hz) */
-#define WINDOW_SAMPLES        (SAMPLE_RATE_HZ / 10U) /* 0.1s window -> SAMPLE_RATE_HZ * 0.1 */
-#define MIN_PEAK_SEP_MS       10                    /* ignore peaks closer than this (ms) (avoid double counts) */
-#define TIMER_CLOCK_HZ        80e6U              /* timer input clock for TIMG6_init */
-#define SCALE_TO_BPM          600U                   /* 60 / 0.1 = 600 */
-#define THRESHOLD 						0000 									/*permanent threshold value*/
-#define PEAKS_AVG_NUM					10				/*number of peaks to average*/
+#define WINDOW_SAMPLES        (SAMPLE_RATE_HZ / 10U)  /* 0.1s window -> SAMPLE_RATE_HZ * 0.1 */
+#define MIN_PEAK_SEP_MS       10                      /* ignore peaks closer than this (ms) (avoid double counts)  */
+#define TIMER_CLOCK_HZ        80e6U                   /* timer input clock for TIMG6_init */
+#define SCALE_TO_BPM          600U                    /* 60 / 0.1 = 600 */
+#define THRESHOLD 						0000 									  /*permanent threshold value*/
+#define PEAKS_AVG_NUM					10			              	/*number of peaks to average*/
  
 /* compile-time allowed size check */
 #if WINDOW_SAMPLES < 1 || WINDOW_SAMPLES > 256
@@ -43,9 +43,9 @@ static uint32_t count = 0;           /* number of samples currently in buffer */
 /* Peak detection state */
 static uint16_t prev = 0;            /* previous ADC sample */
 static bool rising = false;          /* whether signal was rising */
-static uint32_t bpm = 0;							/*constant bpm*/
-static uint32_t ms = 0;							/*ms counter*/
-static uint32_t last_peak_ms = 0;		/*ms of last peak*/
+static uint32_t bpm = 0;					   /*constant bpm*/
+static uint32_t ms = 0;							 /*ms counter*/
+static uint32_t last_peak_ms = 0;		 /*ms of last peak*/
 static uint32_t peaks = 0;           /* peaks counted in current window */
 static uint16_t sample = 0;
 static uint32_t period = 0;
@@ -145,7 +145,7 @@ void TIMG6_IRQHandler(void){
 			rising = true;
 
 
-		} else if ((sample < prev) && rising && (sample > THRESHOLD) && ((ms - last_peak_ms) > MIN_PEAK_SEP_MS)){
+		} else if ((sample < prev) && rising && (sample > THRESHOLD) && ((ms - last_peak_ms) > MIN_PEAK_SEP_MS)){ //increase MIN_PEAK_SEP to avoid double count?
 		//} else if ((sample < prev) && rising ){//&& (sample > THRESHOLD) && ((ms - last_peak_ms) > MIN_PEAK_SEP_MS)){
 			/*peak*/
 			peaks++;
