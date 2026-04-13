@@ -21,11 +21,11 @@
 /* Configuration */
 #define SAMPLE_RATE_HZ        1000U                   /* ISR sampling frequency (Hz) */
 #define WINDOW_SAMPLES        (SAMPLE_RATE_HZ / 10U) /* 0.1s window -> SAMPLE_RATE_HZ * 0.1 */
-#define MIN_PEAK_SEP_MS       150U                    /* ignore peaks closer than this (ms) (avoid double counts) */
+#define MIN_PEAK_SEP_MS       10                    /* ignore peaks closer than this (ms) (avoid double counts) */
 #define TIMER_CLOCK_HZ        80e6U              /* timer input clock for TIMG6_init */
 #define SCALE_TO_BPM          600U                   /* 60 / 0.1 = 600 */
-#define THRESHOLD 						2200U 									/*permanent threshold value*/
-#define PEAKS_AVG_NUM					1U				/*number of peaks to average*/
+#define THRESHOLD 						0000 									/*permanent threshold value*/
+#define PEAKS_AVG_NUM					10				/*number of peaks to average*/
  
 /* compile-time allowed size check */
 #if WINDOW_SAMPLES < 1 || WINDOW_SAMPLES > 256
@@ -47,6 +47,8 @@ static uint32_t bpm = 0;							/*constant bpm*/
 static uint32_t ms = 0;							/*ms counter*/
 static uint32_t last_peak_ms = 0;		/*ms of last peak*/
 static uint32_t peaks = 0;           /* peaks counted in current window */
+static uint16_t sample = 0;
+static uint32_t period = 0;
 
 static uint16_t winMax = 0;          /* running max in window */
 static uint16_t winMin = 0x0FFF;     /* running min in window */
@@ -70,7 +72,7 @@ int main(void)
 {
     UART0_init(); /* enable UART for printing */
 
-	  UART0_put("\033[48;5;231m\033[38;5;232m"); // background white, text dark
+	  UART0_put("\033[?25h\033[48;5;231m\033[38;5;232m"); // show cursor, background white, text dark
 		UART0_put("\033[2J\033[H"); //clear screen
 		UART0_put("UART INITIALIZED!\r\n");
     /* compute timer period to achieve SAMPLE_RATE_HZ and start TIMG6 */
@@ -84,9 +86,52 @@ int main(void)
     push(prev);
 
     /* main loop sleeps; work happens in TIMG6 ISR */
+	
+		UART0_put("\033[?25l"); //hide cursor
     while (1){
-			UART0_put("\rBPM: ");
+			/* read ADC (12-bit) */
+			sample = (uint16_t)(ADC0_getVal() & 0x0FFF);
+			/*print BPM*/
+			UART0_put("          \rBPM: ");
 			UART0_printDec((int) bpm);
+			
+			//debug printing
+			#if 0 //disable all
+			#if 1
+			UART0_put("\r\nADC val: ");
+			UART0_printDec(sample);
+			UART0_put("       \033[F");
+			#endif
+			#if 1
+			UART0_put("\r\n\nms val: ");
+			UART0_printDec(ms);
+			UART0_put("         \033[F\033[F");
+			#endif
+			#if 1
+			UART0_put("\r\n\n\nlast_peak_ms val: ");
+			UART0_printDec(last_peak_ms);
+			UART0_put("       \033[F\033[F\033[F");
+			#endif
+			#if 1
+			UART0_put("\r\n\n\n\n");
+			if(rising){
+				UART0_put(" rising!   ");
+			} else {
+				UART0_put(" falling!   ");
+			}
+			UART0_put("\033[F\033[F\033[F\033[F");
+			#endif
+			#if 1
+			UART0_put("\r\n\n\n\n\npeaks : ");
+			UART0_printDec(peaks);
+			UART0_put("      \033[F\033[F\033[F\033[F\033[F");
+			#endif
+			#if 1
+			UART0_put("\r\n\n\n\n\n\nperiod : ");
+			UART0_printDec(period);
+			UART0_put("      \033[F\033[F\033[F\033[F\033[F\033[F");
+			#endif
+			#endif //disable all
 			
 		}
 }
@@ -95,33 +140,32 @@ void TIMG6_IRQHandler(void){
     /* clear timer interrupt */
     TIMG6->CPU_INT.ICLR = GPTIMER_CPU_INT_ICLR_Z_CLR;
 
-    /* read ADC (12-bit) */
-		//slow?
-    uint16_t sample = (uint16_t)(ADC0_getVal() & 0x0FFF);
-	
-		#if 0
-		UART0_printDec(sample);
-		UART0_put("\r\n");
-		#endif
 
 		if(sample > prev){
 			rising = true;
-			
-			#if 0
-			UART0_put("rising!\r\n");
-			UART0_printDec(idx);
-			#endif
 
-		} else if ((sample < prev) && rising && (sample > THRESHOLD) && (ms - last_peak_ms > MIN_PEAK_SEP_MS)){
+
+		} else if ((sample < prev) && rising && (sample > THRESHOLD) && ((ms - last_peak_ms) > MIN_PEAK_SEP_MS)){
+		//} else if ((sample < prev) && rising ){//&& (sample > THRESHOLD) && ((ms - last_peak_ms) > MIN_PEAK_SEP_MS)){
 			/*peak*/
 			peaks++;
+			#if 0
+			UART0_put("\n\n\n\n\nin");
 
-			if(peaks % PEAKS_AVG_NUM == 0){
-				peaks = 0;
-				uint32_t period = ms / PEAKS_AVG_NUM;
+			#endif
+
+			if((peaks % PEAKS_AVG_NUM == 0) && ms > MIN_PEAK_SEP_MS){
+				
+				period = ms / PEAKS_AVG_NUM;
+				#if 1
+				if(period<100){
+					UART0_put("HOOOOOOOOOOOOOOOOOOOOOLYYYYYYYYYYYYY SHITTTTTTTTTTTTTTTTTT\n\n\n\n\n\n\n");
+				}
+				#endif
 				// update bpm, do calculations as a float
-				bpm = (uint32_t)((float) 6000 / (float) period);
+				bpm = (60000/period);
 				ms = 0;
+				peaks = 0;
 			}
 
 			last_peak_ms = ms;
