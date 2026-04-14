@@ -22,22 +22,40 @@ Dialog DLL:      TARMCM1.DLL V1.13.0.0
  
 <h2>Project:</h2>
 C:\Users\ggg5483\Documents\IDEgit\IDE\proj\Lab08v2\Lab08.uvprojx
-Project File Date:  04/10/2026
+Project File Date:  04/13/2026
 
 <h2>Output:</h2>
 *** Using Compiler 'V6.7', folder: 'C:\Keil_v5\ARM\ARMCLANG\Bin'
 Build target 'Target 1'
-main.c(103): warning: unused variable 'minSepSamples' [-Wunused-variable]
-    uint32_t minSepSamples = (SAMPLE_RATE_HZ * MIN_PEAK_SEP_MS) / 1000U;
-             ^
-main.c(47): warning: unused variable 'peaks' [-Wunused-variable]
-static uint32_t peaks = 0;           /* peaks counted in current window */
+main.c(115): warning: implicit conversion changes signedness: 'uint32_t' (aka 'unsigned int') to 'int' [-Wsign-conversion]
+                        UART0_printDec(ms);
+                        ~~~~~~~~~~~~~~ ^~
+main.c(120): warning: implicit conversion changes signedness: 'uint32_t' (aka 'unsigned int') to 'int' [-Wsign-conversion]
+                        UART0_printDec(last_peak_ms);
+                        ~~~~~~~~~~~~~~ ^~~~~~~~~~~~
+main.c(134): warning: implicit conversion changes signedness: 'uint32_t' (aka 'unsigned int') to 'int' [-Wsign-conversion]
+                        UART0_printDec(peaks);
+                        ~~~~~~~~~~~~~~ ^~~~~
+main.c(139): warning: implicit conversion changes signedness: 'uint32_t' (aka 'unsigned int') to 'int' [-Wsign-conversion]
+                        UART0_printDec(period);
+                        ~~~~~~~~~~~~~~ ^~~~~~
+main.c(90): warning: unused variable 'last_samp' [-Wunused-variable]
+                int last_samp = 0;
+                    ^
+main.c(149): warning: no previous prototype for function 'TIMG12_IRQHandler' [-Wmissing-prototypes]
+void TIMG12_IRQHandler(void){
+     ^
+main.c(55): warning: unused variable 'lastPeakIdx' [-Wunused-variable]
+static uint32_t lastPeakIdx = 0;     /* sample index of last detected peak */
                 ^
-2 warnings generated.
+main.c(56): warning: unused variable 'idx' [-Wunused-variable]
+static uint32_t idx = 0;             /* running sample index */
+                ^
+8 warnings generated.
 compiling main.c...
 linking...
-Program Size: Code=3236 RO-data=292 RW-data=4 ZI-data=1148  
-".\Objects\Lab08.axf" - 0 Error(s), 2 Warning(s).
+Program Size: Code=2774 RO-data=362 RW-data=4 ZI-data=1172  
+".\Objects\Lab08.axf" - 0 Error(s), 8 Warning(s).
 
 <h2>Software Packages used:</h2>
 

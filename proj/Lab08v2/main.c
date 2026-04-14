@@ -24,8 +24,8 @@
 #define MIN_PEAK_SEP_MS       10                      /* ignore peaks closer than this (ms) (avoid double counts)  */
 #define TIMER_CLOCK_HZ        80e6U                   /* timer input clock for TIMG6_init */
 #define SCALE_TO_BPM          600U                    /* 60 / 0.1 = 600 */
-#define THRESHOLD 						0000 									  /*permanent threshold value*/
-#define PEAKS_AVG_NUM					10			              	/*number of peaks to average*/
+#define THRESHOLD 						700 									  /*permanent threshold value*/
+#define PEAKS_AVG_NUM					5			              	/*number of peaks to average*/
  
 /* compile-time allowed size check */
 #if WINDOW_SAMPLES < 1 || WINDOW_SAMPLES > 256
@@ -78,6 +78,7 @@ int main(void)
     /* compute timer period to achieve SAMPLE_RATE_HZ and start TIMG6 */
 
     TIMG6_init(32, 0);
+		TIMG12_init(1500000);
 
     ADC0_init(); /* initialize ADC0 */
 
@@ -86,17 +87,24 @@ int main(void)
     push(prev);
 
     /* main loop sleeps; work happens in TIMG6 ISR */
-	
+		int last_samp = 0;
 		UART0_put("\033[?25l"); //hide cursor
     while (1){
 			/* read ADC (12-bit) */
-			sample = (uint16_t)(ADC0_getVal() & 0x0FFF);
+			
+			#if 0
+			UART0_put("\r\ntime since sample: ");
+			UART0_printDec(ms-last_samp);
+			last_samp = ms;
+			UART0_put("       \033[F");
+			#endif
+			
 			/*print BPM*/
 			UART0_put("          \rBPM: ");
 			UART0_printDec((int) bpm);
 			
 			//debug printing
-			#if 0 //disable all
+			#if 1 //disable all
 			#if 1
 			UART0_put("\r\nADC val: ");
 			UART0_printDec(sample);
@@ -136,14 +144,24 @@ int main(void)
 		}
 }
 
+static int times_risen = 0;
+
+void TIMG12_IRQHandler(void){
+		TIMG12->CPU_INT.ICLR = GPTIMER_CPU_INT_ICLR_Z_CLR;
+		sample = (uint16_t)(ADC0_getVal() & 0x0FFF);
+	
+}
 void TIMG6_IRQHandler(void){
     /* clear timer interrupt */
     TIMG6->CPU_INT.ICLR = GPTIMER_CPU_INT_ICLR_Z_CLR;
 
 
 		if(sample > prev){
-			rising = true;
-
+			if (times_risen < 1){
+				times_risen++;
+			} else {	
+				rising = true;
+			}
 
 		} else if ((prev-sample)<500 && (sample < prev) && rising && (sample > THRESHOLD) && ((ms - last_peak_ms) > MIN_PEAK_SEP_MS)){ //increase MIN_PEAK_SEP to avoid double count?
 		//} else if ((sample < prev) && rising ){//&& (sample > THRESHOLD) && ((ms - last_peak_ms) > MIN_PEAK_SEP_MS)){
@@ -157,19 +175,20 @@ void TIMG6_IRQHandler(void){
 			if((peaks % PEAKS_AVG_NUM == 0) && ms > MIN_PEAK_SEP_MS){
 				
 				period = ms / PEAKS_AVG_NUM;
-				#if 1
-				if(period<100){
-					UART0_put("HOOOOOOOOOOOOOOOOOOOOOLYYYYYYYYYYYYY SHITTTTTTTTTTTTTTTTTT\n\n\n\n\n\n\n");
-				}
-				#endif
+
 				// update bpm, do calculations as a float
+
 				bpm = (60000/period);
+				if(bpm < 50|| bpm >250){
+					bpm = 0;
+				}
 				ms = 0;
 				peaks = 0;
 			}
 
 			last_peak_ms = ms;
 			rising = false;
+			times_risen = 0;
 		}
 		prev = sample;
 		ms++;
