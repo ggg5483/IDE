@@ -163,7 +163,7 @@ void TIMG6_IRQHandler(void){
 				rising = true;
 			}
 
-		} else if ((sample < prev) && rising && (sample > THRESHOLD) && ((ms - last_peak_ms) > MIN_PEAK_SEP_MS)){ //increase MIN_PEAK_SEP to avoid double count?
+		} else if ((prev-sample)<500 && (sample < prev) && rising && (sample > THRESHOLD) && ((ms - last_peak_ms) > MIN_PEAK_SEP_MS)){ //increase MIN_PEAK_SEP to avoid double count?
 		//} else if ((sample < prev) && rising ){//&& (sample > THRESHOLD) && ((ms - last_peak_ms) > MIN_PEAK_SEP_MS)){
 			/*peak*/
 			peaks++;
