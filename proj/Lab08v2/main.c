@@ -1,8 +1,8 @@
 /**
  * ******************************************************************************
  * @file    : main.c
- * @brief   : 
- * @details : 
+ * @brief   : heartbeat monitor
+ * @details : monitors a heart beat via connected light sensor
  * 
  * @author Alexander Hamadeh
  * @author Garrett Geyer
@@ -104,7 +104,7 @@ int main(void)
 			UART0_printDec((int) bpm);
 			
 			//debug printing
-			#if 1 //disable all
+			#if 0 //disable all
 			#if 1
 			UART0_put("\r\nADC val: ");
 			UART0_printDec(sample);
@@ -167,10 +167,6 @@ void TIMG6_IRQHandler(void){
 		//} else if ((sample < prev) && rising ){//&& (sample > THRESHOLD) && ((ms - last_peak_ms) > MIN_PEAK_SEP_MS)){
 			/*peak*/
 			peaks++;
-			#if 0
-			UART0_put("\n\n\n\n\nin");
-
-			#endif
 
 			if((peaks % PEAKS_AVG_NUM == 0) && ms > MIN_PEAK_SEP_MS){
 				
@@ -193,64 +189,5 @@ void TIMG6_IRQHandler(void){
 		prev = sample;
 		ms++;
 		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		#if 0
-		/* add to sliding window and update min/max */
-    push(sample);
-
-    /* threshold = midpoint between window max and min (very simple) */
-    uint16_t threshold = (uint16_t)(((uint32_t)winMax + (uint32_t)winMin) / 2U);
-    /* detect a local maximum: previously rising and now falling */
-    if (sample > prev) {
-        rising = true;
-    } else if (rising && (sample < prev)) {
-        uint32_t sinceLast = idx - lastPeakIdx;
-        /* count peak only if it exceeds threshold and is sufficiently separated */
-        if ((prev > threshold) && (sinceLast >= minSepSamples)) {
-            peaks++;
-						
-            lastPeakIdx = idx;
-        }
-        rising = false;
-    }
-
-    prev = sample;
-    idx++;
-	
-    /* when we've collected WINDOW_SAMPLES samples, compute BPM and print */
-    if ((idx % WINDOW_SAMPLES) == 0) {
-        /* BPM = peaks * SCALE_TO_BPM (SCALE_TO_BPM = 60 / 0.1 = 600) */
-        uint32_t bpm = peaks * SCALE_TO_BPM;
-
-				
-				if(bpm > 0){
-					/* print only the required output */
-					UART0_put("BPM: ");
-					UART0_printDec((int)bpm);
-					UART0_put("\r\n");
-				}
-				
-        /* reset counters and window stats for next measurement window */
-        peaks = 0;
-        head = 0;
-        count = 0;
-        winMax = 0;
-        winMin = 0x0FFF;
-        lastPeakIdx = idx;
-    }
-		#endif
 
 }

@@ -1,21 +1,11 @@
-Circuit: * C:\Users\ggg5483\Documents\IDEgit\IDE\ltspice\heartbeatFilter.asc
-
-Direct Newton iteration for .op point succeeded.
-
-Date: Fri Apr 10 13:16:17 2026
-Total elapsed time: 0.059 seconds.
-
+LTspice 24.0.9 for Windows
+Circuit: * C:\RIT\IDEgithub\IDE\ltspice\heartbeatFilter.asc
+Start Time: Tue Apr 14 17:41:18 2026
+solver = Normal
+Maximum thread count: 16
 tnom = 27
 temp = 27
-method = trap
-totiter = 3
-traniter = 0
-tranpoints = 0
-accept = 0
-rejected = 0
-matrix size = 11
-fillins = 2
-solver = Normal
-Avg thread counts: 28.0/0.0/28.0/3.6
-Matrix Compiler1:      29 opcodes
-Matrix Compiler2: 923 bytes object code size
+method = modified trap
+Direct Newton iteration for .op point succeeded.
+Total elapsed time: 0.084 seconds.
+

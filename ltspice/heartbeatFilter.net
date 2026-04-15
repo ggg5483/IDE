@@ -1,0 +1,21 @@
+* C:\RIT\IDEgithub\IDE\ltspice\heartbeatFilter.asc
+V1 N003 0 AC 1
+C1 N001 N003 10µ
+R1 N001 0 20k
+C2 N002 0 4.7µ
+R4 N002 N004 8.2k
+V2 V- 0 0
+V3 V+ 0 5
+XU2 N002 N006 V+ V- N005 level1 Avol=1Meg GBW=10Meg Vos=0 En=0 Enk=0 In=0 Ink=0 Rin=500Meg
+R5 0 N006 1k
+R6 N005 N006 150k
+XU3 N001 N004 V+ V- N004 level1 Avol=1Meg GBW=10Meg Vos=0 En=0 Enk=0 In=0 Ink=0 Rin=500Meg
+D1 0 N005 D
+D2 N005 3V3 D
+V4 3V3 0 3.3
+.model D D
+.lib C:\Users\garre\AppData\Local\LTspice\lib\cmp\standard.dio
+.ac dec 1000 0.01 100
+.lib UniversalOpAmp1.lib
+.backanno
+.end
