@@ -78,6 +78,9 @@
 #define LEFT_EN_MASK   (1U << 19)         // PB19
 #define RIGHT_EN_MASK  (1U << 22)         // PA22
 
+/* Carpet Stopping */
+#define CARPET_STOP true
+
 /* ============================================================
  *                CAMERA CENTROID + THRESHOLDING
  * ============================================================ */
@@ -265,6 +268,7 @@ int main(void) {
 
                         
 						/* Track end/carpet stop check, checks if NO_TRACK_LIMIT number of consecutive frames logged had no track data*/
+						#if CARPET_STOP
 						if (cen == 0) {
 							no_track++;
 							if (no_track>NO_TRACK_LIMIT) {
@@ -278,6 +282,7 @@ int main(void) {
 						} else { 
 							no_track = 0; 
 						}
+						#endif //CARPET_STOP
 						
         }
         
