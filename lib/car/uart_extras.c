@@ -43,6 +43,35 @@ void UART0_printDec(int num) {
 }
 
 /**
+ * @brief Prints integer value over UART0
+ * @param[in] num - Value to print
+ */
+void UART1_printDec(int num) {
+    int neg = 0;
+    char String[12];
+    char *StringPtr = &String[11]; // Point to the end of the buffer
+    *StringPtr = '\0'; // Null terminator for the string
+
+    // Handle zero case directly
+    if (num == 0) {
+        *(--StringPtr) = '0';
+    } else {
+        if (num < 0) {
+            neg = 1;
+            num = -num; // Convert to positive value
+        }
+        // Convert number to string
+        while (num > 0) {
+            *(--StringPtr) = (num % 10) + '0';
+            num /= 10;
+        }
+        if (neg) *(--StringPtr) = '-';
+    }
+    UART1_put(StringPtr);
+}
+
+
+/**
  * @brief Prints float/double value over UART0
  * @param[in] num - Value to print
  * @note Will have some precision loss due to print method
@@ -64,4 +93,43 @@ void UART0_printFloat(double num) {
         UART0_putchar((char) ('0' + (int) fractionalPart));
         fractionalPart -= (int) fractionalPart;
     }
+}
+
+/**
+ * @brief Prints float/double value over UART1
+ * @param[in] num - Value to print
+ * @note Will have some precision loss due to print method
+ */
+void UART1_printFloat(double num) {
+    if (num < 0) {
+        UART1_putchar('-');
+        num = -num;
+    }
+    int integerPart = (int) num;
+    double fractionalPart = num - integerPart;
+
+    UART1_printDec(integerPart);
+    UART1_putchar('.');
+
+    int precision = 0;
+    while (fractionalPart > 1e-6 && precision++ < 6) {
+        fractionalPart *= 10;
+        UART1_putchar((char) ('0' + (int) fractionalPart));
+        fractionalPart -= (int) fractionalPart;
+    }
+}
+
+/**
+* @brief converts null terminated string into integer, such as "12345\0" -> 12345
+* @note no input verification.
+*/
+int str_to_int(char *str){
+	if (!str){return 0;}
+	int i = 0;
+	int val = 0;
+	while(str[i] != '\0'){
+		val *= 10;
+		val += str[i++] - '0';
+	}
+	return val;
 }

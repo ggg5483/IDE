@@ -72,5 +72,6 @@ void UART1_put(char *ptr_str);
 */
 int UART1_dataAvailable(void);
 
+int UART1_get(char *buf, int buf_size);
 
 #endif // _UART_H_

@@ -1,21 +1,11 @@
 /**
- * car_main.c — IDE Car Project
- * Hybrid Steering (Servo & Differential Motors)
+ * @file main.c
  *
- * OVERVIEW:
- * ---------
- * Control system uses both:
- *   1. Servo steering (TIMA1) — primary steering
- *   2. Differential motor torque (TIMA0) — secondary steering
+ * @brief autonomous car code. Uses line scan camera to control stearing.
  *
- * The servo handles large, smooth directional changes.
- * The differential motor split stabilizes the car and adds corrective torque.
- *
- * The camera provides a 128-pixel line scan. White track = high ADC values.
- * Filter threshold, binarize, compute centroid, filter it, and then fed into a PID.
- *
- * Throttle changes smoothly and never exceeds 50% (course rule).
- * A "watchdog" function stops the car if the track is lost for too long.
+ * @author Alexander Hamadeh
+ * @author Garrett Geyer
+ * @date 
 **/
 
 #include <stdint.h>
@@ -56,6 +46,7 @@
 #define STEARING_RAMP           0.01f    // smooth stearing
 
 /* Motor PWM (TIMA0) */
+#define MOTOR_EN false			//compile-time motor disable
 #define MOTOR_PERIOD_TICKS      3200    
 #define LEFT_CH                 0
 #define RIGHT_CH                2
@@ -79,7 +70,16 @@
 #define RIGHT_EN_MASK  (1U << 22)         // PA22
 
 /* Carpet Stopping */
-#define CARPET_STOP true
+#define CARPET_STOP true								//use carpet stopping?
+	
+/* UART */
+#define UART_EN true
+#if UART_EN
+#include "uart.h"
+#include "uart_extras.h"
+#define BUF_SIZE 20
+
+#endif //UART_EN
 
 /* ============================================================
  *                CAMERA CENTROID + THRESHOLDING
@@ -186,6 +186,21 @@ int main(void) {
     float pid_integral = 0.0f;
     float pid_derivative = 0.0f;
     float pid_output = 0.0f;
+	
+		/* PID changable vals */
+		float kp = KP;
+		float ki = KI;
+		float kd = KD;
+	
+		int camera_center = CAMERA_CENTER;
+	
+	#if UART_EN
+		float kp_saved = KP;
+		float ki_saved = KI;
+		float kd_saved = KD;
+		char buf[BUF_SIZE];
+	#endif //UART_EN
+	
     
         /* Camera/ADC Init */
 				ADC0_init();
@@ -201,15 +216,28 @@ int main(void) {
 				/* SERVO Init */
         TIMA1_PWM_init(SERVO_CH, SERVO_PERIOD_TICKS, 0, servo_angle_to_duty(SERVO_CENTER_US));
         
+				/* UART init */
+				#if UART_EN
+				//UART0_init(); //connected putty terminal
+				UART1_init(); // bluetooth
+				UART1_put("\033[?25h\033[48;5;231m\033[38;5;232m"); // show cursor, background white, text dark
+				UART1_put("\033[2J\033[H"); //clear screen
+				UART1_put("UART INITIALIZED!\r\n");
+				
+				#endif //UART_EN
+				
         /* roughly 5s delay before starting to run the car */
         for(volatile int i = 0; i < 500; i++) {
             delay_1ms();
         }
         
         /* start motors */
+				#if MOTOR_EN
         TIMA0_PWM_DutyCycle(LEFT_CH, TURN_THROTTLE);   
         TIMA0_PWM_DutyCycle(RIGHT_CH, TURN_THROTTLE);
-    
+				#endif //MOTOR_EN
+				
+				main_loop:				
         /* start stearing loop */
         while(1){
             /* Wait for camera frame */
@@ -263,9 +291,10 @@ int main(void) {
 						}
 
 						/* Apply throttle */
+						#if MOTOR_EN
 						TIMA0_PWM_DutyCycle(LEFT_CH, throttle);
 						TIMA0_PWM_DutyCycle(RIGHT_CH, throttle);
-
+						#endif //MOTOR_EN
                         
 						/* Track end/carpet stop check, checks if NO_TRACK_LIMIT number of consecutive frames logged had no track data*/
 						#if CARPET_STOP
@@ -284,7 +313,97 @@ int main(void) {
 						}
 						#endif //CARPET_STOP
 						
-        }
+						/*Uart for BT communication*/
+						#if UART_EN
+						//UART1_put("HELLO WORLD");
+						if(UART1_dataAvailable()){
+							char ch = UART1_getchar();
+							switch (ch) {
+								case 'h':
+								case 'H':
+									UART1_put("UART terminal commands:\r\nh : help\r\ns : save values\r\nr : restore values\r\nv : display values\r\n<p|i|d>XXXXX : set k<> to XX.XXX\r\ncXX : set camera_center to XX\r\n");
+									break;
+								case 's':
+								case 'S':
+									//UART1_put("saved\r\n")
+									ki_saved = ki;
+									kp_saved = kp;
+									kd_saved = kd;
+									break;
+								case 'r':
+								case 'R':
+									//UART1_put("restored\r\n")
+									ki = ki_saved;
+									kp = kp_saved;
+									kd = kd_saved;
+									break;
+								case 'v':
+								case 'V':
+									UART1_put("KP\r\n");
+									UART1_printFloat(kp);
+									UART1_put("\r\nKD\r\n");
+									UART1_printFloat(kd);
+									UART1_put("\r\nKI\r\n");
+									UART1_printFloat(ki);
+									UART1_put("\r\nKP_saved\r\n");
+									UART1_printFloat(kp_saved);
+									UART1_put("\r\nKD_saved\r\n");
+									UART1_printFloat(kd_saved);
+									UART1_put("\r\nKI_saved\r\n");
+									UART1_printFloat(ki_saved);
+									UART1_put("\r\ncamera_center\r\n");
+									UART1_printDec(camera_center);
+									UART1_put("\r\n");
+									break;
+								case 'p':
+								case 'P':
+									UART1_get(&buf, BUF_SIZE);
+									kp = (float) str_to_int(buf) / (float) 1000;
+									//UART1_put(buf);
+									break;
+								case 'i':
+								case 'I':
+									UART1_get(&buf, BUF_SIZE);
+									ki = (float) str_to_int(buf) / (float) 1000;
+									//UART1_put(buf);
+									break;
+								case 'd':
+								case 'D':
+									UART1_get(&buf, BUF_SIZE);
+									kd = (float) str_to_int(buf) / (float) 1000;
+									//UART1_put(buf);
+									break;
+								case 'c':
+								case 'C':
+									UART1_get(&buf, BUF_SIZE);
+									camera_center = str_to_int(buf);
+								case '\r':
+								case '\n':
+									break;
+								default:
+									break;
+								
+							}//switch
+							
+						}// if data available
+						#endif //UART_EN
+						
+						
+        } // while 1, main driving loop
+				
+				#if UART_EN && CARPET_STOP
+				while(1){
+					if(UART1_dataAvailable()){
+							char ch = UART1_getchar();
+							switch (ch) {
+								case 'g':
+									goto main_loop;
+								default:
+									break;
+							}//switch
+					}
+				}//secondary restart
+				#endif // UART_EN && CARPET_STOP
         
 }
 
