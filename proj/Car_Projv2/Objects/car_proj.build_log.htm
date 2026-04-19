@@ -5,7 +5,7 @@
 <h2>Tool Versions:</h2>
 IDE-Version: µVision V5.24.2.0
 Copyright (C) 2017 ARM Ltd and ARM Germany GmbH. All rights reserved.
-License Information: Garrett Geyer, RIT, LIC=----
+License Information: Rick Tolleson, Rochester Institute of Technology, LIC=----
  
 Tool Versions:
 Toolchain:       MDK-Lite  Version: 5.24.1
@@ -21,49 +21,61 @@ Target DLL:      CMSIS_AGDI.dll V1.28.3.0
 Dialog DLL:      TARMCM1.DLL V1.13.0.0
  
 <h2>Project:</h2>
-C:\RIT\IDEgithub\IDE\proj\Car_Projv2\car_proj.uvprojx
-Project File Date:  04/18/2026
+C:\Users\ggg5483\Documents\IDEgithub\IDE\proj\Car_Projv2\car_proj.uvprojx
+Project File Date:  04/19/2026
 
 <h2>Output:</h2>
 *** Using Compiler 'V6.7', folder: 'C:\Keil_v5\ARM\ARMCLANG\Bin'
 Build target 'Target 1'
-../../lib/car/main.c(238): warning: incompatible pointer types passing 'char (*)[20]' to parameter of type 'char *' [-Wincompatible-pointer-types]
+../../lib/car/main.c(273): warning: incompatible pointer types passing 'char (*)[20]' to parameter of type 'char *' [-Wincompatible-pointer-types]
                                 UART1_get(&buf, BUF_SIZE);
                                           ^~~~
 ../../lib/car/uart.h(75): note: passing argument to parameter 'buf' here
 int UART1_get(char *buf, int buf_size);
                     ^
-../../lib/car/main.c(244): warning: incompatible pointer types passing 'char (*)[20]' to parameter of type 'char *' [-Wincompatible-pointer-types]
+../../lib/car/main.c(279): warning: incompatible pointer types passing 'char (*)[20]' to parameter of type 'char *' [-Wincompatible-pointer-types]
                                 UART1_get(&buf, BUF_SIZE);
                                           ^~~~
 ../../lib/car/uart.h(75): note: passing argument to parameter 'buf' here
 int UART1_get(char *buf, int buf_size);
                     ^
-../../lib/car/main.c(250): warning: incompatible pointer types passing 'char (*)[20]' to parameter of type 'char *' [-Wincompatible-pointer-types]
+../../lib/car/main.c(285): warning: incompatible pointer types passing 'char (*)[20]' to parameter of type 'char *' [-Wincompatible-pointer-types]
                                 UART1_get(&buf, BUF_SIZE);
                                           ^~~~
 ../../lib/car/uart.h(75): note: passing argument to parameter 'buf' here
 int UART1_get(char *buf, int buf_size);
                     ^
-../../lib/car/main.c(256): warning: incompatible pointer types passing 'char (*)[20]' to parameter of type 'char *' [-Wincompatible-pointer-types]
+../../lib/car/main.c(291): warning: incompatible pointer types passing 'char (*)[20]' to parameter of type 'char *' [-Wincompatible-pointer-types]
                                 UART1_get(&buf, BUF_SIZE);
                                           ^~~~
 ../../lib/car/uart.h(75): note: passing argument to parameter 'buf' here
 int UART1_get(char *buf, int buf_size);
                     ^
-4 warnings generated.
+../../lib/car/main.c(296): warning: incompatible pointer types passing 'char (*)[20]' to parameter of type 'char *' [-Wincompatible-pointer-types]
+        UART1_get(&buf, BUF_SIZE);
+                  ^~~~
+../../lib/car/uart.h(75): note: passing argument to parameter 'buf' here
+int UART1_get(char *buf, int buf_size);
+                    ^
+../../lib/car/main.c(301): warning: incompatible pointer types passing 'char (*)[20]' to parameter of type 'char *' [-Wincompatible-pointer-types]
+        UART1_get(&buf, BUF_SIZE);
+                  ^~~~
+../../lib/car/uart.h(75): note: passing argument to parameter 'buf' here
+int UART1_get(char *buf, int buf_size);
+                    ^
+6 warnings generated.
 compiling main.c...
 linking...
-Program Size: Code=8444 RO-data=604 RW-data=52 ZI-data=1388  
-".\Objects\car_proj.axf" - 0 Error(s), 4 Warning(s).
+Program Size: Code=8504 RO-data=688 RW-data=68 ZI-data=1388  
+".\Objects\car_proj.axf" - 0 Error(s), 6 Warning(s).
 
 <h2>Software Packages used:</h2>
 
 Package Vendor: ARM
-                http://www.keil.com/pack/ARM.CMSIS.5.0.1.pack
-                ARM.CMSIS.5.0.1
-                CMSIS (Cortex Microcontroller Software Interface Standard)
-   * Component: CORE Version: 5.0.1
+                http://www.keil.com/pack/ARM.CMSIS.5.9.0.pack
+                ARM.CMSIS.5.9.0
+                CMSIS (Common Microcontroller Software Interface Standard)
+   * Component: CORE Version: 5.6.0
 
 Package Vendor: TexasInstruments
                 https://software-dl.ti.com/msp430/esd/MSPM0-CMSIS/MSPM0G1X0X_G3X0X/latest/exports/TexasInstruments.MSPM0G1X0X_G3X0X_DFP.1.3.1.pack
@@ -72,11 +84,11 @@ Package Vendor: TexasInstruments
 
 <h2>Collection of Component include folders:</h2>
   .\RTE\_Target_1
-  C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.1\CMSIS\Include
+  C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.9.0\CMSIS\Core\Include
 
 <h2>Collection of Component Files used:</h2>
 
-   * Component: ARM::CMSIS:CORE:5.0.1
+   * Component: ARM::CMSIS:CORE:5.6.0
 Build Time Elapsed:  00:00:01
 </pre>
 </body>

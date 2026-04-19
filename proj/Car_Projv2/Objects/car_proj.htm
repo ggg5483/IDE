@@ -3,7 +3,7 @@
 <title>Static Call Graph - [.\Objects\car_proj.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\Objects\car_proj.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6070001: Last Updated: Sun Apr 19 02:50:50 2026
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6070001: Last Updated: Sun Apr 19 16:29:00 2026
 <BR><P>
 <H3>Maximum Stack Usage =        184 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -620,7 +620,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> startup_mspm0g350x_uvision.o(RESET)
 </UL>
-<P><STRONG><a name="[53]"></a>TIMG0_init</STRONG> (Thumb, 108 bytes, Stack size 8 bytes, timers.o(.text.TIMG0_init))
+<P><STRONG><a name="[53]"></a>TIMG0_init</STRONG> (Thumb, 104 bytes, Stack size 8 bytes, timers.o(.text.TIMG0_init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = TIMG0_init
 </UL>
 <BR>[Called By]<UL><LI><a href="#[51]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Camera_init
@@ -631,7 +631,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> startup_mspm0g350x_uvision.o(RESET)
 </UL>
-<P><STRONG><a name="[54]"></a>TIMG6_init</STRONG> (Thumb, 108 bytes, Stack size 8 bytes, timers.o(.text.TIMG6_init))
+<P><STRONG><a name="[54]"></a>TIMG6_init</STRONG> (Thumb, 104 bytes, Stack size 8 bytes, timers.o(.text.TIMG6_init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = TIMG6_init
 </UL>
 <BR>[Called By]<UL><LI><a href="#[51]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Camera_init
@@ -699,7 +699,7 @@ Global Symbols
 <LI><a href="#[61]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART1_putchar
 </UL>
 
-<P><STRONG><a name="[63]"></a>handle_uart</STRONG> (Thumb, 448 bytes, Stack size 16 bytes, main.o(.text.handle_uart))
+<P><STRONG><a name="[63]"></a>handle_uart</STRONG> (Thumb, 536 bytes, Stack size 16 bytes, main.o(.text.handle_uart))
 <BR><BR>[Stack]<UL><LI>Max Depth = 36<LI>Call Chain = handle_uart &rArr; __aeabi_fdiv
 </UL>
 <BR>[Calls]<UL><LI><a href="#[65]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;str_to_int
@@ -712,7 +712,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[31]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[31]"></a>main</STRONG> (Thumb, 944 bytes, Stack size 72 bytes, main.o(.text.main))
+<P><STRONG><a name="[31]"></a>main</STRONG> (Thumb, 924 bytes, Stack size 72 bytes, main.o(.text.main))
 <BR><BR>[Stack]<UL><LI>Max Depth = 184<LI>Call Chain = main &rArr; TIMA1_PWM_init &rArr; TIMA1_PWM_DutyCycle &rArr; __aeabi_dmul
 </UL>
 <BR>[Calls]<UL><LI><a href="#[68]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;servo_angle_to_duty

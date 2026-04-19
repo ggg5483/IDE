@@ -33,10 +33,10 @@
 #define NO_TRACK_LIMIT          10        // watchdog threshold (frames)
 
 /* PID gains (tuned for hybrid control) */
-#define KP  3.80f
+#define KP  1.50f
 #define KI  0.00f
 #define KD  0.5f
-#define PID_SCALER 2.5f
+#define PID_SCALER 2.7f
 
 /* Servo PWM (TIMA1) */
 #define SERVO_PERIOD_TICKS      640 
@@ -54,10 +54,10 @@
 
 /* Throttle rules */
 #define INIT_THROTTLE           0.00f
-#define MAX_THROTTLE            0.36f     // never exceed 50%
-#define TURN_THROTTLE           0.26f     // slowest throttle when steering
-#define THROTTLE_RAMP_UP        0.0015f    // smooth acceleration/deceleration
-#define THROTTLE_RAMP_DOWN      0.05f     // smooth acceleration/deceleration
+#define MAX_THROTTLE            0.43f     // never exceed 50%
+#define TURN_THROTTLE           0.22f     // slowest throttle when steering
+#define THROTTLE_RAMP_UP        0.001f    // smooth acceleration/deceleration
+#define THROTTLE_RAMP_DOWN      0.1f     // smooth acceleration/deceleration
 
 /* Differential steering scaling */
 #define DIFF_SCALE              0.02f     // PID ? torque split
@@ -71,7 +71,7 @@
 #define RIGHT_EN_MASK  (1U << 22)         // PA22
 
 /* Carpet Stopping */
-#define CARPET_STOP true								//use carpet stopping?
+#define CARPET_STOP false								//use carpet stopping?
 	
 /* UART */
 #define UART_EN true
@@ -81,6 +81,32 @@
 #define BUF_SIZE 20
 
 #endif //UART_EN
+/* ============================================================
+ *             				   notes
+ * ============================================================ */
+
+/**
+4/19/26
+battery position affect steering - in back of car, to little tracksion of turning wheel -> moved to center of car
+
+
+battery voltage significantly changes car response.
+7.89v - P2D0.5I0, scaler 2.7, Max T 0.43, turn T 0.22
+worked well
+
+swap in 8.25v
+can still stay on the track, but starts to have back wheels rotate to outside of turn
+
+wiped down back wheels -> stopped drifting, started understeering
+Wiped down all four wheels -> goes back do drifting but much less, more drifting is caused by track sliding
+
+Wanted to get max_throttle to 0.5 - > caused more oscillations, turned kp to 1.5 helped, causes occasional snake-skipping(two u-turns, might skip the second.
+turned off carpet stopping to stop this from stopping the car.
+Increase turn throttle to 0.25 - > helped with track sliding, turns a little wider but still makes it.
+
+battery fell to 7.7v over ~1.5 hours. Final values 7.7v, PID 1.5, 0.5, 0, MAX 0.5, TURN 0.25, scaler 2.7
+
+*/
 
 
 /* ============================================================
@@ -92,13 +118,18 @@
 		float ki = KI;
 		float kd = KD;
 		float pid_scaler = PID_SCALER;
-	
+
+    float max_throttle = MAX_THROTTLE;
+    float turn_throttle = TURN_THROTTLE;
+
 	/* UART values */
 	#if UART_EN
 		float kp_saved = KP;
 		float ki_saved = KI;
 		float kd_saved = KD;
 		float pid_scaler_saved = PID_SCALER;
+    float max_throttle_saved = MAX_THROTTLE;
+    float turn_throttle_saved = TURN_THROTTLE;
 		char buf[BUF_SIZE];
 	#endif //UART_EN
 
@@ -199,7 +230,7 @@ void handle_uart(char ch){
 	switch (ch) {
 			case 'h':
 			case 'H':
-				UART1_put("UART terminal commands:\r\nh : help\r\n<p|i|d>XXXXX : set k<> to XX.XXX\r\ns : save values\r\nr : restore values\r\nv : display values\r\nx<XXXX>: set pid_scaler to X.XXX\r\ng : start car if stopped\r\n");
+				UART1_put("UART terminal commands:\r\nh : help\r\n<p|i|d>XXXXX : set k<> to XX.XXX\r\nq : stop\r\ns : save values\r\nr : restore values\r\nv : display values\r\nx<XXXX>: set pid_scaler to X.XXX\r\ng : start car if stopped\r\ntXXX : max throttle to 0.xxx\r\ncXXX : turn/corner throttle to 0.xxx\r\n");
 				break;
 			case 's':
 			case 'S':
@@ -208,6 +239,8 @@ void handle_uart(char ch){
 				kp_saved = kp;
 				kd_saved = kd;
 				pid_scaler_saved = pid_scaler;
+        max_throttle_saved = max_throttle;
+        turn_throttle_saved = turn_throttle;
 				break;
 			case 'r':
 			case 'R':
@@ -216,6 +249,8 @@ void handle_uart(char ch){
 				kp = kp_saved;
 				kd = kd_saved;
 				pid_scaler = pid_scaler_saved;
+        max_throttle = max_throttle_saved;
+        turn_throttle = turn_throttle_saved;
 				break;
 			case 'v':
 			case 'V':
@@ -225,12 +260,12 @@ void handle_uart(char ch){
 				UART1_printFloat(kd);
 				UART1_put("\r\nKI\r\n");
 				UART1_printFloat(ki);
-				UART1_put("\r\nKP_saved\r\n");
-				UART1_printFloat(kp_saved);
-				UART1_put("\r\nKD_saved\r\n");
-				UART1_printFloat(kd_saved);
-				UART1_put("\r\nKI_saved\r\n");
-				UART1_printFloat(ki_saved);
+        UART1_put("\r\npid_scaler\r\n");
+				UART1_printFloat(pid_scaler);
+        UART1_put("\r\nmax_throttle\r\n");
+				UART1_printFloat(max_throttle);
+        UART1_put("\r\nturn_throttle\r\n");
+				UART1_printFloat(turn_throttle);
 				UART1_put("\r\n");
 				break;
 			case 'p':
@@ -255,6 +290,18 @@ void handle_uart(char ch){
 			case 'X':
 				UART1_get(&buf, BUF_SIZE);
 				pid_scaler = (float) str_to_int(buf) / (float) 1000;
+        break;
+      case 't':
+      case 'T':
+        UART1_get(&buf, BUF_SIZE);
+				max_throttle = (float) str_to_int(buf) / (float) 1000;
+        break;
+      case 'c':
+      case 'C':
+        UART1_get(&buf, BUF_SIZE);
+				turn_throttle = (float) str_to_int(buf) / (float) 1000;
+        break;
+        break;
 			case '\r':
 			case '\n':
 				break;
@@ -371,7 +418,7 @@ int main(void) {
 						- MAX_THROTTLE on straights
 						- TURN_THROTTLE in hard turns
 						*/
-						float target = MAX_THROTTLE - (norm * (MAX_THROTTLE - TURN_THROTTLE));
+						float target = max_throttle - (norm * (max_throttle - turn_throttle));
 
 						/* Smooth ramp toward target */
 						if (throttle < target) {
@@ -410,6 +457,7 @@ int main(void) {
 						//UART1_put("HELLO WORLD");
 						if(UART1_dataAvailable()){
 							char ch = UART1_getchar();
+              if(ch == 'q')goto uart_stop;
 							handle_uart(ch);
 							
 						}// if data available
@@ -419,7 +467,11 @@ int main(void) {
         } // while 1, main driving loop
 				
 				//option to restart car over uart, if both are enabled
-				#if UART_EN && CARPET_STOP
+				#if UART_EN
+        uart_stop:
+        TIMA0_PWM_DutyCycle(LEFT_CH, INIT_THROTTLE);   
+        TIMA0_PWM_DutyCycle(RIGHT_CH, INIT_THROTTLE);  
+        TIMA1_PWM_DutyCycle(SERVO_CH, servo_angle_to_duty(SERVO_CENTER_US));
 				while(1){
 					if(UART1_dataAvailable()){
 							char ch = UART1_getchar();
