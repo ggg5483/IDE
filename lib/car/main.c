@@ -223,15 +223,34 @@ double servo_angle_to_duty(int angle){
 
 /**
 * @brief helper function to handle UART terminal
-* @note causes 4 warnings i don't know how to fix
 */
 #if UART_EN
 void handle_uart(char ch){
 	switch (ch) {
 			case 'h':
 			case 'H':
-				UART1_put("UART terminal commands:\r\nh : help\r\n<p|i|d>XXXXX : set k<> to XX.XXX\r\nq : stop\r\ns : save values\r\nr : restore values\r\nv : display values\r\nx<XXXX>: set pid_scaler to X.XXX\r\ng : start car if stopped\r\ntXXX : max throttle to 0.xxx\r\ncXXX : turn/corner throttle to 0.xxx\r\n");
-				break;
+				UART1_put("UART terminal commands:\r\n");
+				UART1_put("h : help\r\n");
+				UART1_put("<p|i|d>XXXXX : set k<> to XX.XXX\r\n");
+				UART1_put("q : stop\r\n");
+				UART1_put("s : save values\r\n");
+				UART1_put("r : restore values\r\n");
+				UART1_put("v : display values\r\n");
+				UART1_put("x<XXXX>: set pid_scaler to X.XXX\r\n");
+				UART1_put("g : start car if stopped\r\n");
+				UART1_put("tXXX : max throttle to 0.xxx\r\n");
+				UART1_put("cXXX : turn/corner throttle to 0.xxx\r\n");
+//				UART1_put("");
+//				UART1_put("");
+//				UART1_put("");
+//				UART1_put("");
+//				UART1_put("");
+//				UART1_put("");
+//				UART1_put("");
+//				UART1_put("");
+//				UART1_put("");
+//				UART1_put("");
+			break;
 			case 's':
 			case 'S':
 				//UART1_put("saved\r\n")
@@ -270,35 +289,35 @@ void handle_uart(char ch){
 				break;
 			case 'p':
 			case 'P':
-				UART1_get(&buf, BUF_SIZE);
+				UART1_get(buf, BUF_SIZE);
 				kp = (float) str_to_int(buf) / (float) 1000;
 				//UART1_put(buf);
 				break;
 			case 'i':
 			case 'I':
-				UART1_get(&buf, BUF_SIZE);
+				UART1_get(buf, BUF_SIZE);
 				ki = (float) str_to_int(buf) / (float) 1000;
 				//UART1_put(buf);
 				break;
 			case 'd':
 			case 'D':
-				UART1_get(&buf, BUF_SIZE);
+				UART1_get(buf, BUF_SIZE);
 				kd = (float) str_to_int(buf) / (float) 1000;
 				//UART1_put(buf);
 				break;
 			case 'x':
 			case 'X':
-				UART1_get(&buf, BUF_SIZE);
+				UART1_get(buf, BUF_SIZE);
 				pid_scaler = (float) str_to_int(buf) / (float) 1000;
         break;
       case 't':
       case 'T':
-        UART1_get(&buf, BUF_SIZE);
+        UART1_get(buf, BUF_SIZE);
 				max_throttle = (float) str_to_int(buf) / (float) 1000;
         break;
       case 'c':
       case 'C':
-        UART1_get(&buf, BUF_SIZE);
+        UART1_get(buf, BUF_SIZE);
 				turn_throttle = (float) str_to_int(buf) / (float) 1000;
         break;
         break;
