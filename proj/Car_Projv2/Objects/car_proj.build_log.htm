@@ -27,29 +27,35 @@ Project File Date:  04/18/2026
 <h2>Output:</h2>
 *** Using Compiler 'V6.7', folder: 'C:\Keil_v5\ARM\ARMCLANG\Bin'
 Build target 'Target 1'
-../../lib/car/main.c(357): warning: incompatible pointer types passing 'char (*)[20]' to parameter of type 'char *' [-Wincompatible-pointer-types]
-                                                                        UART1_get(&buf, BUF_SIZE);
-                                                                                  ^~~~
+../../lib/car/main.c(227): warning: incompatible pointer types passing 'char (*)[20]' to parameter of type 'char *' [-Wincompatible-pointer-types]
+                                UART1_get(&buf, BUF_SIZE);
+                                          ^~~~
 ../../lib/car/uart.h(75): note: passing argument to parameter 'buf' here
 int UART1_get(char *buf, int buf_size);
                     ^
-../../lib/car/main.c(363): warning: incompatible pointer types passing 'char (*)[20]' to parameter of type 'char *' [-Wincompatible-pointer-types]
-                                                                        UART1_get(&buf, BUF_SIZE);
-                                                                                  ^~~~
+../../lib/car/main.c(233): warning: incompatible pointer types passing 'char (*)[20]' to parameter of type 'char *' [-Wincompatible-pointer-types]
+                                UART1_get(&buf, BUF_SIZE);
+                                          ^~~~
 ../../lib/car/uart.h(75): note: passing argument to parameter 'buf' here
 int UART1_get(char *buf, int buf_size);
                     ^
-../../lib/car/main.c(369): warning: incompatible pointer types passing 'char (*)[20]' to parameter of type 'char *' [-Wincompatible-pointer-types]
-                                                                        UART1_get(&buf, BUF_SIZE);
-                                                                                  ^~~~
+../../lib/car/main.c(239): warning: incompatible pointer types passing 'char (*)[20]' to parameter of type 'char *' [-Wincompatible-pointer-types]
+                                UART1_get(&buf, BUF_SIZE);
+                                          ^~~~
 ../../lib/car/uart.h(75): note: passing argument to parameter 'buf' here
 int UART1_get(char *buf, int buf_size);
                     ^
-3 warnings generated.
+../../lib/car/main.c(245): warning: incompatible pointer types passing 'char (*)[20]' to parameter of type 'char *' [-Wincompatible-pointer-types]
+                                UART1_get(&buf, BUF_SIZE);
+                                          ^~~~
+../../lib/car/uart.h(75): note: passing argument to parameter 'buf' here
+int UART1_get(char *buf, int buf_size);
+                    ^
+4 warnings generated.
 compiling main.c...
 linking...
-Program Size: Code=8228 RO-data=564 RW-data=0 ZI-data=1384  
-".\Objects\car_proj.axf" - 0 Error(s), 3 Warning(s).
+Program Size: Code=6812 RO-data=404 RW-data=0 ZI-data=1384  
+".\Objects\car_proj.axf" - 0 Error(s), 4 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -71,7 +77,7 @@ Package Vendor: TexasInstruments
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE:5.0.1
-Build Time Elapsed:  00:00:00
+Build Time Elapsed:  00:00:01
 </pre>
 </body>
 </html>

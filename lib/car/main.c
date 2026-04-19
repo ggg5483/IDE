@@ -36,6 +36,7 @@
 #define KP  3.80f
 #define KI  0.00f
 #define KD  0.5f
+#define PID_SCALER 2.5f
 
 /* Servo PWM (TIMA1) */
 #define SERVO_PERIOD_TICKS      640 
@@ -46,7 +47,7 @@
 #define STEARING_RAMP           0.01f    // smooth stearing
 
 /* Motor PWM (TIMA0) */
-#define MOTOR_EN false			//compile-time motor disable
+#define MOTOR_EN true			//compile-time motor disable
 #define MOTOR_PERIOD_TICKS      3200    
 #define LEFT_CH                 0
 #define RIGHT_CH                2
@@ -80,6 +81,26 @@
 #define BUF_SIZE 20
 
 #endif //UART_EN
+
+
+/* ============================================================
+ *             				   GLOBAL VARIABLES
+ * ============================================================ */
+
+		/* PID changable vals */
+		float kp = KP;
+		float ki = KI;
+		float kd = KD;
+		float pid_scaler = PID_SCALER;
+	
+	/* UART values */
+	#if UART_EN
+		float kp_saved = KP;
+		float ki_saved = KI;
+		float kd_saved = KD;
+		float pid_scaler_saved = PID_SCALER;
+		char buf[BUF_SIZE];
+	#endif //UART_EN
 
 /* ============================================================
  *                CAMERA CENTROID + THRESHOLDING
@@ -169,6 +190,81 @@ double servo_angle_to_duty(int angle){
     return pulse / 0.020;      // divide by 20 ms period
 }
 
+/**
+* @brief helper function to handle UART terminal
+* @note causes 4 warnings i don't know how to fix
+*/
+#if UART_EN
+void handle_uart(char ch){
+	switch (ch) {
+			case 'h':
+			case 'H':
+				UART1_put("UART terminal commands:\r\nh : help\r\n<p|i|d>XXXXX : set k<> to XX.XXX\r\ns : save values\r\nr : restore values\r\nv : display values\r\nx<XXXX>: set pid_scaler to X.XXX\r\ng : start car if stopped\r\n");
+				break;
+			case 's':
+			case 'S':
+				//UART1_put("saved\r\n")
+				ki_saved = ki;
+				kp_saved = kp;
+				kd_saved = kd;
+				pid_scaler_saved = pid_scaler;
+				break;
+			case 'r':
+			case 'R':
+				//UART1_put("restored\r\n")
+				ki = ki_saved;
+				kp = kp_saved;
+				kd = kd_saved;
+				pid_scaler = pid_scaler_saved;
+				break;
+			case 'v':
+			case 'V':
+				UART1_put("KP\r\n");
+				UART1_printFloat(kp);
+				UART1_put("\r\nKD\r\n");
+				UART1_printFloat(kd);
+				UART1_put("\r\nKI\r\n");
+				UART1_printFloat(ki);
+				UART1_put("\r\nKP_saved\r\n");
+				UART1_printFloat(kp_saved);
+				UART1_put("\r\nKD_saved\r\n");
+				UART1_printFloat(kd_saved);
+				UART1_put("\r\nKI_saved\r\n");
+				UART1_printFloat(ki_saved);
+				UART1_put("\r\n");
+				break;
+			case 'p':
+			case 'P':
+				UART1_get(&buf, BUF_SIZE);
+				kp = (float) str_to_int(buf) / (float) 1000;
+				//UART1_put(buf);
+				break;
+			case 'i':
+			case 'I':
+				UART1_get(&buf, BUF_SIZE);
+				ki = (float) str_to_int(buf) / (float) 1000;
+				//UART1_put(buf);
+				break;
+			case 'd':
+			case 'D':
+				UART1_get(&buf, BUF_SIZE);
+				kd = (float) str_to_int(buf) / (float) 1000;
+				//UART1_put(buf);
+				break;
+			case 'x':
+			case 'X':
+				UART1_get(&buf, BUF_SIZE);
+				pid_scaler = (float) str_to_int(buf) / (float) 1000;
+			case '\r':
+			case '\n':
+				break;
+			default:
+				break;
+			
+		}//switch
+}
+#endif // UART_EN
+
 /* ============================================================
  *                          MAIN LOOP
  * ============================================================ */
@@ -187,19 +283,7 @@ int main(void) {
     float pid_derivative = 0.0f;
     float pid_output = 0.0f;
 	
-		/* PID changable vals */
-		float kp = KP;
-		float ki = KI;
-		float kd = KD;
-	
-		int camera_center = CAMERA_CENTER;
-	
-	#if UART_EN
-		float kp_saved = KP;
-		float ki_saved = KI;
-		float kd_saved = KD;
-		char buf[BUF_SIZE];
-	#endif //UART_EN
+
 	
     
         /* Camera/ADC Init */
@@ -260,10 +344,10 @@ int main(void) {
 						pid_prev_error = pid_error;
 
 						/* PID output */
-						pid_output = (KP * pid_error) + (KI * pid_integral) + (KD * pid_derivative);
+						pid_output = (kp * pid_error) + (ki * pid_integral) + (kd * pid_derivative);
 
 						/* Servo steering using PID */
-						angle = SERVO_CENTER_US + (pid_output * 2.5f); //adjust for how responsive we want the stearing control
+						angle = SERVO_CENTER_US + (pid_output * pid_scaler); //adjust for how responsive we want the stearing control
 						if (angle < SERVO_MIN_US) {angle = SERVO_MIN_US;}
             else if (angle > SERVO_MAX_US) {angle = SERVO_MAX_US;}
             TIMA1_PWM_DutyCycle(SERVO_CH, servo_angle_to_duty(angle));
@@ -318,72 +402,7 @@ int main(void) {
 						//UART1_put("HELLO WORLD");
 						if(UART1_dataAvailable()){
 							char ch = UART1_getchar();
-							switch (ch) {
-								case 'h':
-								case 'H':
-									UART1_put("UART terminal commands:\r\nh : help\r\ns : save values\r\nr : restore values\r\nv : display values\r\n<p|i|d>XXXXX : set k<> to XX.XXX\r\ncXX : set camera_center to XX\r\n");
-									break;
-								case 's':
-								case 'S':
-									//UART1_put("saved\r\n")
-									ki_saved = ki;
-									kp_saved = kp;
-									kd_saved = kd;
-									break;
-								case 'r':
-								case 'R':
-									//UART1_put("restored\r\n")
-									ki = ki_saved;
-									kp = kp_saved;
-									kd = kd_saved;
-									break;
-								case 'v':
-								case 'V':
-									UART1_put("KP\r\n");
-									UART1_printFloat(kp);
-									UART1_put("\r\nKD\r\n");
-									UART1_printFloat(kd);
-									UART1_put("\r\nKI\r\n");
-									UART1_printFloat(ki);
-									UART1_put("\r\nKP_saved\r\n");
-									UART1_printFloat(kp_saved);
-									UART1_put("\r\nKD_saved\r\n");
-									UART1_printFloat(kd_saved);
-									UART1_put("\r\nKI_saved\r\n");
-									UART1_printFloat(ki_saved);
-									UART1_put("\r\ncamera_center\r\n");
-									UART1_printDec(camera_center);
-									UART1_put("\r\n");
-									break;
-								case 'p':
-								case 'P':
-									UART1_get(&buf, BUF_SIZE);
-									kp = (float) str_to_int(buf) / (float) 1000;
-									//UART1_put(buf);
-									break;
-								case 'i':
-								case 'I':
-									UART1_get(&buf, BUF_SIZE);
-									ki = (float) str_to_int(buf) / (float) 1000;
-									//UART1_put(buf);
-									break;
-								case 'd':
-								case 'D':
-									UART1_get(&buf, BUF_SIZE);
-									kd = (float) str_to_int(buf) / (float) 1000;
-									//UART1_put(buf);
-									break;
-								case 'c':
-								case 'C':
-									UART1_get(&buf, BUF_SIZE);
-									camera_center = str_to_int(buf);
-								case '\r':
-								case '\n':
-									break;
-								default:
-									break;
-								
-							}//switch
+							handle_uart(ch);
 							
 						}// if data available
 						#endif //UART_EN
@@ -391,18 +410,15 @@ int main(void) {
 						
         } // while 1, main driving loop
 				
+				//option to restart car over uart, if both are enabled
 				#if UART_EN && CARPET_STOP
 				while(1){
 					if(UART1_dataAvailable()){
 							char ch = UART1_getchar();
-							switch (ch) {
-								case 'g':
-									goto main_loop;
-								default:
-									break;
-							}//switch
-					}
-				}//secondary restart
+							if(ch == 'g') goto main_loop;
+							handle_uart(ch);
+					} ///if
+				}//while
 				#endif // UART_EN && CARPET_STOP
         
 }

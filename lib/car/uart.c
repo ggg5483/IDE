@@ -254,10 +254,13 @@ void UART1_put(char *ptr_str){
 	}
 }
 
+/**
+* @brief gets continuously until a 
+*/
 int UART1_get(char *buf, int buf_size){
 	int i = 0;
 	char ch = UART1_getchar(); 
-	while(ch != '\r' && ch != '\n'){
+	while((ch != '\r') && (ch != '\n') && (i < buf_size-1)){
 		if(ch == '\b' || ch == 0x7F){
 					if (i != 0) {i = i - 1;}
 				} else {
