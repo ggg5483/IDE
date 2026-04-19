@@ -268,6 +268,14 @@ void handle_uart(char ch){
 /* ============================================================
  *                          MAIN LOOP
  * ============================================================ */
+/**
+*choosing main function
+* 1 - main
+* 2 - testing/debugging main
+*/
+#define MAIN (1)
+
+#if MAIN == 1
 int main(void) {
     
     int angle = SERVO_CENTER_US;
@@ -422,9 +430,37 @@ int main(void) {
 				#endif // UART_EN && CARPET_STOP
         
 }
+#endif // MAIN == 1
 
+#if MAIN == 2
+int main(void) {
+				/*
+				0 - left forewords
+				1 - nothing
+				2 - right  forewords
+				3 - did nothing
+	
+	
+				*/
+				int channel = 0;
+				//start 0 throttle
+				TIMA0_PWM_init(channel, MOTOR_PERIOD_TICKS, 0, INIT_THROTTLE );
 
+				for(volatile int i = 0; i < 500; i++) {
+            delay_1ms();
+        }
+    
+				/* Enable DC motors */
+				DC_ENABLE();
+				
+				TIMA0_PWM_DutyCycle(channel, 0.3);
+				/* SERVO Init */
+        //TIMA1_PWM_init(SERVO_CH, SERVO_PERIOD_TICKS, 0, servo_angle_to_duty(SERVO_CENTER_US));
 
+	return 0;
+}
+
+#endif // MAIN == 2
 //int main(void) {
 //	
 //		int angle = SERVO_CENTER_US;
