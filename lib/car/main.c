@@ -125,6 +125,10 @@ battery fell to 7.7v over ~1.5 hours. Final values 7.7v, PID 1.5, 0.5, 0, MAX 0.
 
     float max_throttle = MAX_THROTTLE;
     float turn_throttle = TURN_THROTTLE;
+    
+    #if DIFF_STEER_EN
+    float diff_scale = DIFF_SCALE;
+    #endif //diff en
 
 	/* UART values */
 	#if UART_EN
@@ -244,6 +248,7 @@ void handle_uart(char ch){
 				UART1_put("g : start car if stopped\r\n");
 				UART1_put("tXXX : max throttle to 0.xxx\r\n");
 				UART1_put("cXXX : turn/corner throttle to 0.xxx\r\n");
+        UART1_put("kXXX : diff scale to 0.xxx\r\n");
 //				UART1_put("");
 //				UART1_put("");
 //				UART1_put("");
@@ -253,8 +258,7 @@ void handle_uart(char ch){
 //				UART1_put("");
 //				UART1_put("");
 //				UART1_put("");
-//				UART1_put("");
-			break;
+        break;
 			case 's':
 			case 'S':
 				//UART1_put("saved\r\n")
@@ -289,6 +293,10 @@ void handle_uart(char ch){
 				UART1_printFloat(max_throttle);
         UART1_put("\r\nturn_throttle\r\n");
 				UART1_printFloat(turn_throttle);
+      #if DIFF_STEER_EN
+        UART1_put("\r\ndiff_scale\r\n");
+				UART1_printFloat(diff_scale);
+      #endif
 				UART1_put("\r\n");
 				break;
 			case 'p':
@@ -324,7 +332,13 @@ void handle_uart(char ch){
         UART1_get(buf, BUF_SIZE);
 				turn_throttle = (float) str_to_int(buf) / (float) 1000;
         break;
+      #if DIFF_STEER_EN
+      case 'k':
+      case 'K':
+        UART1_get(buf, BUF_SIZE);
+        diff_scale = (float) str_to_int(buf) / (float) 1000;
         break;
+      #endif
 			case '\r':
 			case '\n':
 				break;
@@ -353,6 +367,8 @@ int main(void) {
 		#if DIFF_STEER_EN
 		float throttle_left = TURN_THROTTLE;
 		float throttle_right = TURN_THROTTLE;
+    float target_left = TURN_THROTTLE;
+    float target_right = TURN_THROTTLE;
 		#else // DIFF_STEER_EN
     float throttle = TURN_THROTTLE;
 		#endif // DIFF_STEER_EN
@@ -438,22 +454,23 @@ int main(void) {
 
 						#if DIFF_STEER_EN
 						
-						float diff_mod = pid_output * DIFF_SCALE;
+						float diff_mod = pid_output * diff_scale;
 							
 						
 						
-						if(diff_mod < 0){
+						if(diff_mod > 0){
 							// if pif<0 -> turning left -> want left less than right
-							diff_mod = -diff_mod;
+							
 							if(diff_mod > 1) diff_mod = 1;
-							float target_left = max_throttle - (diff_mod * (max_throttle - turn_throttle));
-							float target_right = max_throttle;
+							target_left = max_throttle - (diff_mod * (max_throttle - turn_throttle));
+							target_right = max_throttle;
 							
 						} else {
+              diff_mod = -diff_mod;
 							// if pid>0 -> turing right -> want right less than left
 							if(diff_mod > 1) diff_mod = 1;
-							float target_left = max_throttle;
-							float target_right = max_throttle - (diff_mod * (max_throttle - turn_throttle));
+							target_left = max_throttle;
+							target_right = max_throttle - (diff_mod * (max_throttle - turn_throttle));
 						} //diff_mod<0
 						
 						

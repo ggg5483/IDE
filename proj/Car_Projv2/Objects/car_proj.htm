@@ -3,7 +3,7 @@
 <title>Static Call Graph - [.\Objects\car_proj.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\Objects\car_proj.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6070001: Last Updated: Sun Apr 19 16:29:00 2026
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6070001: Last Updated: Sun Apr 19 22:34:55 2026
 <BR><P>
 <H3>Maximum Stack Usage =        184 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -686,8 +686,7 @@ Global Symbols
 <P><STRONG><a name="[25]"></a>UART1_put</STRONG> (Thumb, 36 bytes, Stack size 16 bytes, uart.o(.text.UART1_put))
 <BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = UART1_put
 </UL>
-<BR>[Called By]<UL><LI><a href="#[63]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;handle_uart
-<LI><a href="#[5e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART1_printDec
+<BR>[Called By]<UL><LI><a href="#[5e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART1_printDec
 </UL>
 <BR>[Address Reference Count : 2]<UL><LI> main.o(.text.handle_uart)
 <LI> main.o(.text.main)
@@ -699,11 +698,10 @@ Global Symbols
 <LI><a href="#[61]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART1_putchar
 </UL>
 
-<P><STRONG><a name="[63]"></a>handle_uart</STRONG> (Thumb, 536 bytes, Stack size 16 bytes, main.o(.text.handle_uart))
+<P><STRONG><a name="[63]"></a>handle_uart</STRONG> (Thumb, 716 bytes, Stack size 16 bytes, main.o(.text.handle_uart))
 <BR><BR>[Stack]<UL><LI>Max Depth = 36<LI>Call Chain = handle_uart &rArr; __aeabi_fdiv
 </UL>
 <BR>[Calls]<UL><LI><a href="#[65]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;str_to_int
-<LI><a href="#[25]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART1_put
 <LI><a href="#[64]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART1_get
 <LI><a href="#[44]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_i2f
 <LI><a href="#[66]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fdiv
