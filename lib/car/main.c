@@ -111,6 +111,11 @@ Increase turn throttle to 0.25 - > helped with track sliding, turns a little wid
 
 battery fell to 7.7v over ~1.5 hours. Final values 7.7v, PID 1.5, 0.5, 0, MAX 0.5, TURN 0.25, scaler 2.7
 
+4/20/26
+implemented diff steering -> 0.2 seemesed a bit high, dorppded to 0.1.
+slowing down a bit slow -> throttle_pid_scale to 0.01 (maybe could be higher - test)
+camera at -20 degrees
+max throttle 0.5, turn 0.18, diff_scale 0.002
 */
 
 
@@ -483,7 +488,7 @@ int main(void) {
 						if(throttle_k < 0) throttle_k = -throttle_k;
 						if(throttle_k > 1) throttle_k = 1;
 						
-						//test to make sure diff in correct direction, change -/+ if so
+						//test to make sure diff in correct direction, change -/+ if so (i think these are correct now
 						target_left = max_throttle - (throttle_k * (max_throttle - turn_throttle)) - (diff_k * diff_max);
 						target_right = max_throttle - (throttle_k * (max_throttle - turn_throttle)) + (diff_k * diff_max);
 					
