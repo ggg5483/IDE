@@ -26,11 +26,11 @@
 /* Camera geometry */
 #define CAMERA_PIXELS           128
 #define CAMERA_CENTER           64.0f     // ideal centroid (accounting for off centered camera) increase if to the right of center, decrease if to the left of center (point camera slightly to the right)
-#define CENTER_DEADBAND         3.0f      // acceptable error before slowing/turning (for intersection/wavy)
+//#define CENTER_DEADBAND         3.0f      // acceptable error before slowing/turning (for intersection/wavy)
 
 /* Filtering */
-#define FILTER_WINDOW           5         // moving-average window
-#define NO_TRACK_LIMIT          10        // watchdog threshold (frames)
+//#define FILTER_WINDOW           5         // moving-average window
+//#define NO_TRACK_LIMIT          10        // watchdog threshold (frames)
 
 /* PID gains (tuned for hybrid control) */
 #define KP  1.50f
