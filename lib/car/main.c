@@ -55,14 +55,15 @@
 /* Throttle rules */
 #define INIT_THROTTLE           0.00f
 #define MAX_THROTTLE            0.43f     // never exceed 50%
+#define MAX_THROTTLE_ABSOLUTE		0.5f
 #define TURN_THROTTLE           0.22f     // slowest throttle when steering
 #define THROTTLE_RAMP_UP        0.001f    // smooth acceleration/deceleration
 #define THROTTLE_RAMP_DOWN      0.1f     // smooth acceleration/deceleration
 
 /* Differential steering */
-#define DIFF_SCALE              0.02f     //pid to diff scale
+#define DIFF_SCALE              0.002f     //pid to diff scale
 #define DIFF_MAX                0.20f     // max difference
-#define DIFF_STEER_EN false								//use diff steering?
+#define DIFF_STEER_EN true								//use diff steering?
 
 /* Thresholding */
 #define THRESH_FACTOR           0.55f     // adaptive threshold factor (to account for different light levels)
@@ -128,6 +129,8 @@ battery fell to 7.7v over ~1.5 hours. Final values 7.7v, PID 1.5, 0.5, 0, MAX 0.
     
     #if DIFF_STEER_EN
     float diff_scale = DIFF_SCALE;
+		float diff_max = DIFF_MAX;
+		float throttle_pid_scale = 0.007f;
     #endif //diff en
 
 	/* UART values */
@@ -248,7 +251,11 @@ void handle_uart(char ch){
 				UART1_put("g : start car if stopped\r\n");
 				UART1_put("tXXX : max throttle to 0.xxx\r\n");
 				UART1_put("cXXX : turn/corner throttle to 0.xxx\r\n");
+			#if DIFF_STEER_EN
         UART1_put("kXXX : diff scale to 0.xxx\r\n");
+				UART1_put("LXXX : diff max to 0.xxx\r\n");
+				UART1_put("fXXX : throttle pid scale to 0.xxx\r\n");
+			#endif
 //				UART1_put("");
 //				UART1_put("");
 //				UART1_put("");
@@ -296,6 +303,10 @@ void handle_uart(char ch){
       #if DIFF_STEER_EN
         UART1_put("\r\ndiff_scale\r\n");
 				UART1_printFloat(diff_scale);
+				UART1_put("\r\ndiff_max\r\n");
+				UART1_printFloat(diff_max);
+				UART1_put("\r\nthrottle_pid_scale\r\n");
+				UART1_printFloat(throttle_pid_scale);
       #endif
 				UART1_put("\r\n");
 				break;
@@ -338,6 +349,19 @@ void handle_uart(char ch){
         UART1_get(buf, BUF_SIZE);
         diff_scale = (float) str_to_int(buf) / (float) 1000;
         break;
+			case 'l':
+			case 'L':
+				UART1_get(buf, BUF_SIZE);
+        diff_max = (float) str_to_int(buf) / (float) 1000;
+        break;
+			case 'f':
+			case 'F':
+				UART1_get(buf, BUF_SIZE);
+        throttle_pid_scale = (float) str_to_int(buf) / (float) 1000;
+        break;
+			
+			
+			
       #endif
 			case '\r':
 			case '\n':
@@ -404,9 +428,6 @@ int main(void) {
 				#if UART_EN
 				//UART0_init(); //connected putty terminal
 				UART1_init(); // bluetooth
-				UART1_put("\033[?25h\033[48;5;231m\033[38;5;232m"); // show cursor, background white, text dark
-				UART1_put("\033[2J\033[H"); //clear screen
-				UART1_put("UART INITIALIZED!\r\n");
 				
 				#endif //UART_EN
 				
@@ -454,25 +475,23 @@ int main(void) {
 
 						#if DIFF_STEER_EN
 						
-						float diff_mod = pid_output * diff_scale;
-							
+						float diff_k = pid_output * diff_scale;
+						if(diff_k > 1) diff_k = 1;
+						if(diff_k < -1) diff_k = -1;
 						
+						float throttle_k = pid_output * throttle_pid_scale;
+						if(throttle_k < 0) throttle_k = -throttle_k;
+						if(throttle_k > 1) throttle_k = 1;
 						
-						if(diff_mod > 0){
-							// if pif<0 -> turning left -> want left less than right
-							
-							if(diff_mod > 1) diff_mod = 1;
-							target_left = max_throttle - (diff_mod * (max_throttle - turn_throttle));
-							target_right = max_throttle;
-							
-						} else {
-              diff_mod = -diff_mod;
-							// if pid>0 -> turing right -> want right less than left
-							if(diff_mod > 1) diff_mod = 1;
-							target_left = max_throttle;
-							target_right = max_throttle - (diff_mod * (max_throttle - turn_throttle));
-						} //diff_mod<0
+						//test to make sure diff in correct direction, change -/+ if so
+						target_left = max_throttle - (throttle_k * (max_throttle - turn_throttle)) - (diff_k * diff_max);
+						target_right = max_throttle - (throttle_k * (max_throttle - turn_throttle)) + (diff_k * diff_max);
+					
+						if(target_left < 0) target_left = 0;
+						if(target_left > MAX_THROTTLE_ABSOLUTE) target_left = MAX_THROTTLE_ABSOLUTE;
 						
+						if(target_right < 0) target_right = 0;
+						if(target_right > MAX_THROTTLE_ABSOLUTE) target_right = MAX_THROTTLE_ABSOLUTE;
 						
 						
 						/* Smooth ramp toward target */
@@ -553,6 +572,17 @@ int main(void) {
 						if(UART1_dataAvailable()){
 							char ch = UART1_getchar();
               if(ch == 'q')goto uart_stop;
+							if(ch == '?'){
+								UART1_put("pid_output\r\n");
+								UART1_printFloat(pid_output);
+								UART1_put("\r\npid_error\r\n");
+								UART1_printFloat(pid_error);
+								UART1_put("\r\npid_derivative\r\n");
+								UART1_printFloat(pid_derivative);
+								UART1_put("\r\npid_integral\r\n");
+								UART1_printFloat(pid_integral);
+								
+							} //?
 							handle_uart(ch);
 							
 						}// if data available
@@ -561,7 +591,7 @@ int main(void) {
 						
         } // while 1, main driving loop
 				
-				//option to restart car over uart, if both are enabled
+				//option to restart car over uart, if enabled
 				#if UART_EN
         uart_stop:
         TIMA0_PWM_DutyCycle(LEFT_CH, INIT_THROTTLE);   
