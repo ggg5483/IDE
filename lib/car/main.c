@@ -59,9 +59,10 @@
 #define THROTTLE_RAMP_UP        0.001f    // smooth acceleration/deceleration
 #define THROTTLE_RAMP_DOWN      0.1f     // smooth acceleration/deceleration
 
-/* Differential steering scaling */
-#define DIFF_SCALE              0.02f     // PID ? torque split
-#define DIFF_MAX                0.20f     // ±20% torque redistribution (max variance in motor assisted turning)
+/* Differential steering */
+#define DIFF_SCALE              0.02f     //pid to diff scale
+#define DIFF_MAX                0.20f     // max difference
+#define DIFF_STEER_EN false								//use diff steering?
 
 /* Thresholding */
 #define THRESH_FACTOR           0.55f     // adaptive threshold factor (to account for different light levels)
@@ -72,6 +73,9 @@
 
 /* Carpet Stopping */
 #define CARPET_STOP false								//use carpet stopping?
+	
+
+
 	
 /* UART */
 #define UART_EN true
@@ -346,7 +350,13 @@ int main(void) {
     
     int angle = SERVO_CENTER_US;
     int no_track = 0;
+		#if DIFF_STEER_EN
+		float throttle_left = TURN_THROTTLE;
+		float throttle_right = TURN_THROTTLE;
+		#else // DIFF_STEER_EN
     float throttle = TURN_THROTTLE;
+		#endif // DIFF_STEER_EN
+	
   	uint8_t bin[CAMERA_PIXELS];
     int offCen = 0;
     
@@ -426,6 +436,53 @@ int main(void) {
             else if (angle > SERVO_MAX_US) {angle = SERVO_MAX_US;}
             TIMA1_PWM_DutyCycle(SERVO_CH, servo_angle_to_duty(angle));
 
+						#if DIFF_STEER_EN
+						
+						float diff_mod = pid_output * DIFF_SCALE;
+							
+						
+						
+						if(diff_mod < 0){
+							// if pif<0 -> turning left -> want left less than right
+							diff_mod = -diff_mod;
+							if(diff_mod > 1) diff_mod = 1;
+							float target_left = max_throttle - (diff_mod * (max_throttle - turn_throttle));
+							float target_right = max_throttle;
+							
+						} else {
+							// if pid>0 -> turing right -> want right less than left
+							if(diff_mod > 1) diff_mod = 1;
+							float target_left = max_throttle;
+							float target_right = max_throttle - (diff_mod * (max_throttle - turn_throttle));
+						} //diff_mod<0
+						
+						
+						
+						/* Smooth ramp toward target */
+						if (throttle_left < target_left) {
+							throttle_left += THROTTLE_RAMP_UP;
+							if (throttle_left > target_left) throttle_left = target_left;
+						} else {
+							throttle_left -= THROTTLE_RAMP_DOWN;
+							if (throttle_left < target_left) throttle_left = target_left;
+						}
+						if (throttle_right < target_right) {
+							throttle_right += THROTTLE_RAMP_UP;
+							if (throttle_right > target_right) throttle_right = target_right;
+						} else {
+							throttle_right -= THROTTLE_RAMP_DOWN;
+							if (throttle_right < target_right) throttle_right = target_right;
+						}
+						
+						
+						/* Apply throttle */
+						#if MOTOR_EN
+						TIMA0_PWM_DutyCycle(LEFT_CH, throttle_left);
+						TIMA0_PWM_DutyCycle(RIGHT_CH, throttle_right);
+						#endif //MOTOR_EN
+						
+						#else // DIFF_STEER_EN 
+						/*no diff steering, just slow down at turns*/
 						/* Throttle control using PID magnitude */
 						float absErr = fabsf(pid_error);
 
@@ -453,7 +510,9 @@ int main(void) {
 						TIMA0_PWM_DutyCycle(LEFT_CH, throttle);
 						TIMA0_PWM_DutyCycle(RIGHT_CH, throttle);
 						#endif //MOTOR_EN
-                        
+            #endif // DIFF_STEER_EN    
+
+						
 						/* Track end/carpet stop check, checks if NO_TRACK_LIMIT number of consecutive frames logged had no track data*/
 						#if CARPET_STOP
 						if (cen == 0) {
