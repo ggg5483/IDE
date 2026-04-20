@@ -1,21 +1,11 @@
 /**
- * car_main.c — IDE Car Project
- * Hybrid Steering (Servo & Differential Motors)
+ * @file main.c
  *
- * OVERVIEW:
- * ---------
- * Control system uses both:
- *   1. Servo steering (TIMA1) — primary steering
- *   2. Differential motor torque (TIMA0) — secondary steering
+ * @brief autonomous car code. Uses line scan camera to control stearing.
  *
- * The servo handles large, smooth directional changes.
- * The differential motor split stabilizes the car and adds corrective torque.
- *
- * The camera provides a 128-pixel line scan. White track = high ADC values.
- * Filter threshold, binarize, compute centroid, filter it, and then fed into a PID.
- *
- * Throttle changes smoothly and never exceeds 50% (course rule).
- * A "watchdog" function stops the car if the track is lost for too long.
+ * @author Alexander Hamadeh
+ * @author Garrett Geyer
+ * @date 
 **/
 
 #include <stdint.h>
@@ -36,16 +26,17 @@
 /* Camera geometry */
 #define CAMERA_PIXELS           128
 #define CAMERA_CENTER           64.0f     // ideal centroid (accounting for off centered camera) increase if to the right of center, decrease if to the left of center (point camera slightly to the right)
-#define CENTER_DEADBAND         3.0f      // acceptable error before slowing/turning (for intersection/wavy)
+//#define CENTER_DEADBAND         3.0f      // acceptable error before slowing/turning (for intersection/wavy)
 
 /* Filtering */
-#define FILTER_WINDOW           5         // moving-average window
-#define NO_TRACK_LIMIT          10        // watchdog threshold (frames)
+//#define FILTER_WINDOW           5         // moving-average window
+//#define NO_TRACK_LIMIT          10        // watchdog threshold (frames)
 
 /* PID gains (tuned for hybrid control) */
-#define KP  3.80f
+#define KP  1.50f
 #define KI  0.00f
 #define KD  0.5f
+#define PID_SCALER 2.7f
 
 /* Servo PWM (TIMA1) */
 #define SERVO_PERIOD_TICKS      640 
@@ -56,20 +47,23 @@
 #define STEARING_RAMP           0.01f    // smooth stearing
 
 /* Motor PWM (TIMA0) */
+#define MOTOR_EN true			//compile-time motor disable
 #define MOTOR_PERIOD_TICKS      3200    
 #define LEFT_CH                 0
 #define RIGHT_CH                2
 
 /* Throttle rules */
 #define INIT_THROTTLE           0.00f
-#define MAX_THROTTLE            0.36f     // never exceed 50%
-#define TURN_THROTTLE           0.26f     // slowest throttle when steering
-#define THROTTLE_RAMP_UP        0.0015f    // smooth acceleration/deceleration
-#define THROTTLE_RAMP_DOWN      0.05f     // smooth acceleration/deceleration
+#define MAX_THROTTLE            0.43f     // never exceed 50%
+#define MAX_THROTTLE_ABSOLUTE		0.5f
+#define TURN_THROTTLE           0.22f     // slowest throttle when steering
+#define THROTTLE_RAMP_UP        0.001f    // smooth acceleration/deceleration
+#define THROTTLE_RAMP_DOWN      0.1f     // smooth acceleration/deceleration
 
-/* Differential steering scaling */
-#define DIFF_SCALE              0.02f     // PID ? torque split
-#define DIFF_MAX                0.20f     // ±20% torque redistribution (max variance in motor assisted turning)
+/* Differential steering */
+#define DIFF_SCALE              0.002f     //pid to diff scale
+#define DIFF_MAX                0.20f     // max difference
+#define DIFF_STEER_EN true								//use diff steering?
 
 /* Thresholding */
 #define THRESH_FACTOR           0.55f     // adaptive threshold factor (to account for different light levels)
@@ -77,6 +71,78 @@
 /* Motor Controller Enable */
 #define LEFT_EN_MASK   (1U << 19)         // PB19
 #define RIGHT_EN_MASK  (1U << 22)         // PA22
+
+/* Carpet Stopping */
+#define CARPET_STOP false								//use carpet stopping?
+	
+
+
+	
+/* UART */
+#define UART_EN true
+#if UART_EN
+#include "uart.h"
+#include "uart_extras.h"
+#define BUF_SIZE 20
+
+#endif //UART_EN
+/* ============================================================
+ *             				   notes
+ * ============================================================ */
+
+/**
+4/19/26
+battery position affect steering - in back of car, to little tracksion of turning wheel -> moved to center of car
+
+
+battery voltage significantly changes car response.
+7.89v - P2D0.5I0, scaler 2.7, Max T 0.43, turn T 0.22
+worked well
+
+swap in 8.25v
+can still stay on the track, but starts to have back wheels rotate to outside of turn
+
+wiped down back wheels -> stopped drifting, started understeering
+Wiped down all four wheels -> goes back do drifting but much less, more drifting is caused by track sliding
+
+Wanted to get max_throttle to 0.5 - > caused more oscillations, turned kp to 1.5 helped, causes occasional snake-skipping(two u-turns, might skip the second.
+turned off carpet stopping to stop this from stopping the car.
+Increase turn throttle to 0.25 - > helped with track sliding, turns a little wider but still makes it.
+
+battery fell to 7.7v over ~1.5 hours. Final values 7.7v, PID 1.5, 0.5, 0, MAX 0.5, TURN 0.25, scaler 2.7
+
+*/
+
+
+/* ============================================================
+ *             				   GLOBAL VARIABLES
+ * ============================================================ */
+
+		/* PID changable vals */
+		float kp = KP;
+		float ki = KI;
+		float kd = KD;
+		float pid_scaler = PID_SCALER;
+
+    float max_throttle = MAX_THROTTLE;
+    float turn_throttle = TURN_THROTTLE;
+    
+    #if DIFF_STEER_EN
+    float diff_scale = DIFF_SCALE;
+		float diff_max = DIFF_MAX;
+		float throttle_pid_scale = 0.007f;
+    #endif //diff en
+
+	/* UART values */
+	#if UART_EN
+		float kp_saved = KP;
+		float ki_saved = KI;
+		float kd_saved = KD;
+		float pid_scaler_saved = PID_SCALER;
+    float max_throttle_saved = MAX_THROTTLE;
+    float turn_throttle_saved = TURN_THROTTLE;
+		char buf[BUF_SIZE];
+	#endif //UART_EN
 
 /* ============================================================
  *                CAMERA CENTROID + THRESHOLDING
@@ -166,14 +232,171 @@ double servo_angle_to_duty(int angle){
     return pulse / 0.020;      // divide by 20 ms period
 }
 
+/**
+* @brief helper function to handle UART terminal
+*/
+#if UART_EN
+void handle_uart(char ch){
+	switch (ch) {
+			case 'h':
+			case 'H':
+				UART1_put("UART terminal commands:\r\n");
+				UART1_put("h : help\r\n");
+				UART1_put("<p|i|d>XXXXX : set k<> to XX.XXX\r\n");
+				UART1_put("q : stop\r\n");
+				UART1_put("s : save values\r\n");
+				UART1_put("r : restore values\r\n");
+				UART1_put("v : display values\r\n");
+				UART1_put("x<XXXX>: set pid_scaler to X.XXX\r\n");
+				UART1_put("g : start car if stopped\r\n");
+				UART1_put("tXXX : max throttle to 0.xxx\r\n");
+				UART1_put("cXXX : turn/corner throttle to 0.xxx\r\n");
+			#if DIFF_STEER_EN
+        UART1_put("kXXX : diff scale to 0.xxx\r\n");
+				UART1_put("LXXX : diff max to 0.xxx\r\n");
+				UART1_put("fXXX : throttle pid scale to 0.xxx\r\n");
+			#endif
+//				UART1_put("");
+//				UART1_put("");
+//				UART1_put("");
+//				UART1_put("");
+//				UART1_put("");
+//				UART1_put("");
+//				UART1_put("");
+//				UART1_put("");
+//				UART1_put("");
+        break;
+			case 's':
+			case 'S':
+				//UART1_put("saved\r\n")
+				ki_saved = ki;
+				kp_saved = kp;
+				kd_saved = kd;
+				pid_scaler_saved = pid_scaler;
+        max_throttle_saved = max_throttle;
+        turn_throttle_saved = turn_throttle;
+				break;
+			case 'r':
+			case 'R':
+				//UART1_put("restored\r\n")
+				ki = ki_saved;
+				kp = kp_saved;
+				kd = kd_saved;
+				pid_scaler = pid_scaler_saved;
+        max_throttle = max_throttle_saved;
+        turn_throttle = turn_throttle_saved;
+				break;
+			case 'v':
+			case 'V':
+				UART1_put("KP\r\n");
+				UART1_printFloat(kp);
+				UART1_put("\r\nKD\r\n");
+				UART1_printFloat(kd);
+				UART1_put("\r\nKI\r\n");
+				UART1_printFloat(ki);
+        UART1_put("\r\npid_scaler\r\n");
+				UART1_printFloat(pid_scaler);
+        UART1_put("\r\nmax_throttle\r\n");
+				UART1_printFloat(max_throttle);
+        UART1_put("\r\nturn_throttle\r\n");
+				UART1_printFloat(turn_throttle);
+      #if DIFF_STEER_EN
+        UART1_put("\r\ndiff_scale\r\n");
+				UART1_printFloat(diff_scale);
+				UART1_put("\r\ndiff_max\r\n");
+				UART1_printFloat(diff_max);
+				UART1_put("\r\nthrottle_pid_scale\r\n");
+				UART1_printFloat(throttle_pid_scale);
+      #endif
+				UART1_put("\r\n");
+				break;
+			case 'p':
+			case 'P':
+				UART1_get(buf, BUF_SIZE);
+				kp = (float) str_to_int(buf) / (float) 1000;
+				//UART1_put(buf);
+				break;
+			case 'i':
+			case 'I':
+				UART1_get(buf, BUF_SIZE);
+				ki = (float) str_to_int(buf) / (float) 1000;
+				//UART1_put(buf);
+				break;
+			case 'd':
+			case 'D':
+				UART1_get(buf, BUF_SIZE);
+				kd = (float) str_to_int(buf) / (float) 1000;
+				//UART1_put(buf);
+				break;
+			case 'x':
+			case 'X':
+				UART1_get(buf, BUF_SIZE);
+				pid_scaler = (float) str_to_int(buf) / (float) 1000;
+        break;
+      case 't':
+      case 'T':
+        UART1_get(buf, BUF_SIZE);
+				max_throttle = (float) str_to_int(buf) / (float) 1000;
+        break;
+      case 'c':
+      case 'C':
+        UART1_get(buf, BUF_SIZE);
+				turn_throttle = (float) str_to_int(buf) / (float) 1000;
+        break;
+      #if DIFF_STEER_EN
+      case 'k':
+      case 'K':
+        UART1_get(buf, BUF_SIZE);
+        diff_scale = (float) str_to_int(buf) / (float) 1000;
+        break;
+			case 'l':
+			case 'L':
+				UART1_get(buf, BUF_SIZE);
+        diff_max = (float) str_to_int(buf) / (float) 1000;
+        break;
+			case 'f':
+			case 'F':
+				UART1_get(buf, BUF_SIZE);
+        throttle_pid_scale = (float) str_to_int(buf) / (float) 1000;
+        break;
+			
+			
+			
+      #endif
+			case '\r':
+			case '\n':
+				break;
+			default:
+				break;
+			
+		}//switch
+}
+#endif // UART_EN
+
 /* ============================================================
  *                          MAIN LOOP
  * ============================================================ */
+/**
+*choosing main function
+* 1 - main
+* 2 - testing/debugging main
+*/
+#define MAIN (1)
+
+#if MAIN == 1
 int main(void) {
     
     int angle = SERVO_CENTER_US;
     int no_track = 0;
+		#if DIFF_STEER_EN
+		float throttle_left = TURN_THROTTLE;
+		float throttle_right = TURN_THROTTLE;
+    float target_left = TURN_THROTTLE;
+    float target_right = TURN_THROTTLE;
+		#else // DIFF_STEER_EN
     float throttle = TURN_THROTTLE;
+		#endif // DIFF_STEER_EN
+	
   	uint8_t bin[CAMERA_PIXELS];
     int offCen = 0;
     
@@ -183,6 +406,9 @@ int main(void) {
     float pid_integral = 0.0f;
     float pid_derivative = 0.0f;
     float pid_output = 0.0f;
+	
+
+	
     
         /* Camera/ADC Init */
 				ADC0_init();
@@ -198,15 +424,25 @@ int main(void) {
 				/* SERVO Init */
         TIMA1_PWM_init(SERVO_CH, SERVO_PERIOD_TICKS, 0, servo_angle_to_duty(SERVO_CENTER_US));
         
+				/* UART init */
+				#if UART_EN
+				//UART0_init(); //connected putty terminal
+				UART1_init(); // bluetooth
+				
+				#endif //UART_EN
+				
         /* roughly 5s delay before starting to run the car */
         for(volatile int i = 0; i < 500; i++) {
             delay_1ms();
         }
         
         /* start motors */
+				#if MOTOR_EN
         TIMA0_PWM_DutyCycle(LEFT_CH, TURN_THROTTLE);   
         TIMA0_PWM_DutyCycle(RIGHT_CH, TURN_THROTTLE);
-    
+				#endif //MOTOR_EN
+				
+				main_loop:				
         /* start stearing loop */
         while(1){
             /* Wait for camera frame */
@@ -229,14 +465,60 @@ int main(void) {
 						pid_prev_error = pid_error;
 
 						/* PID output */
-						pid_output = (KP * pid_error) + (KI * pid_integral) + (KD * pid_derivative);
+						pid_output = (kp * pid_error) + (ki * pid_integral) + (kd * pid_derivative);
 
 						/* Servo steering using PID */
-						angle = SERVO_CENTER_US + (pid_output * 2.5f); //adjust for how responsive we want the stearing control
+						angle = SERVO_CENTER_US + (pid_output * pid_scaler); //adjust for how responsive we want the stearing control
 						if (angle < SERVO_MIN_US) {angle = SERVO_MIN_US;}
             else if (angle > SERVO_MAX_US) {angle = SERVO_MAX_US;}
             TIMA1_PWM_DutyCycle(SERVO_CH, servo_angle_to_duty(angle));
 
+						#if DIFF_STEER_EN
+						
+						float diff_k = pid_output * diff_scale;
+						if(diff_k > 1) diff_k = 1;
+						if(diff_k < -1) diff_k = -1;
+						
+						float throttle_k = pid_output * throttle_pid_scale;
+						if(throttle_k < 0) throttle_k = -throttle_k;
+						if(throttle_k > 1) throttle_k = 1;
+						
+						//test to make sure diff in correct direction, change -/+ if so
+						target_left = max_throttle - (throttle_k * (max_throttle - turn_throttle)) - (diff_k * diff_max);
+						target_right = max_throttle - (throttle_k * (max_throttle - turn_throttle)) + (diff_k * diff_max);
+					
+						if(target_left < 0) target_left = 0;
+						if(target_left > MAX_THROTTLE_ABSOLUTE) target_left = MAX_THROTTLE_ABSOLUTE;
+						
+						if(target_right < 0) target_right = 0;
+						if(target_right > MAX_THROTTLE_ABSOLUTE) target_right = MAX_THROTTLE_ABSOLUTE;
+						
+						
+						/* Smooth ramp toward target */
+						if (throttle_left < target_left) {
+							throttle_left += THROTTLE_RAMP_UP;
+							if (throttle_left > target_left) throttle_left = target_left;
+						} else {
+							throttle_left -= THROTTLE_RAMP_DOWN;
+							if (throttle_left < target_left) throttle_left = target_left;
+						}
+						if (throttle_right < target_right) {
+							throttle_right += THROTTLE_RAMP_UP;
+							if (throttle_right > target_right) throttle_right = target_right;
+						} else {
+							throttle_right -= THROTTLE_RAMP_DOWN;
+							if (throttle_right < target_right) throttle_right = target_right;
+						}
+						
+						
+						/* Apply throttle */
+						#if MOTOR_EN
+						TIMA0_PWM_DutyCycle(LEFT_CH, throttle_left);
+						TIMA0_PWM_DutyCycle(RIGHT_CH, throttle_right);
+						#endif //MOTOR_EN
+						
+						#else // DIFF_STEER_EN 
+						/*no diff steering, just slow down at turns*/
 						/* Throttle control using PID magnitude */
 						float absErr = fabsf(pid_error);
 
@@ -248,7 +530,7 @@ int main(void) {
 						- MAX_THROTTLE on straights
 						- TURN_THROTTLE in hard turns
 						*/
-						float target = MAX_THROTTLE - (norm * (MAX_THROTTLE - TURN_THROTTLE));
+						float target = max_throttle - (norm * (max_throttle - turn_throttle));
 
 						/* Smooth ramp toward target */
 						if (throttle < target) {
@@ -260,11 +542,15 @@ int main(void) {
 						}
 
 						/* Apply throttle */
+						#if MOTOR_EN
 						TIMA0_PWM_DutyCycle(LEFT_CH, throttle);
 						TIMA0_PWM_DutyCycle(RIGHT_CH, throttle);
+						#endif //MOTOR_EN
+            #endif // DIFF_STEER_EN    
 
-                        
+						
 						/* Track end/carpet stop check, checks if NO_TRACK_LIMIT number of consecutive frames logged had no track data*/
+						#if CARPET_STOP
 						if (cen == 0) {
 							no_track++;
 							if (no_track>NO_TRACK_LIMIT) {
@@ -278,13 +564,80 @@ int main(void) {
 						} else { 
 							no_track = 0; 
 						}
+						#endif //CARPET_STOP
 						
-        }
+						/*Uart for BT communication*/
+						#if UART_EN
+						//UART1_put("HELLO WORLD");
+						if(UART1_dataAvailable()){
+							char ch = UART1_getchar();
+              if(ch == 'q')goto uart_stop;
+							if(ch == '?'){
+								UART1_put("pid_output\r\n");
+								UART1_printFloat(pid_output);
+								UART1_put("\r\npid_error\r\n");
+								UART1_printFloat(pid_error);
+								UART1_put("\r\npid_derivative\r\n");
+								UART1_printFloat(pid_derivative);
+								UART1_put("\r\npid_integral\r\n");
+								UART1_printFloat(pid_integral);
+								
+							} //?
+							handle_uart(ch);
+							
+						}// if data available
+						#endif //UART_EN
+						
+						
+        } // while 1, main driving loop
+				
+				//option to restart car over uart, if enabled
+				#if UART_EN
+        uart_stop:
+        TIMA0_PWM_DutyCycle(LEFT_CH, INIT_THROTTLE);   
+        TIMA0_PWM_DutyCycle(RIGHT_CH, INIT_THROTTLE);  
+        TIMA1_PWM_DutyCycle(SERVO_CH, servo_angle_to_duty(SERVO_CENTER_US));
+				while(1){
+					if(UART1_dataAvailable()){
+							char ch = UART1_getchar();
+							if(ch == 'g') goto main_loop;
+							handle_uart(ch);
+					} ///if
+				}//while
+				#endif // UART_EN && CARPET_STOP
         
 }
+#endif // MAIN == 1
 
+#if MAIN == 2
+int main(void) {
+				/*
+				0 - left forewords
+				1 - nothing
+				2 - right  forewords
+				3 - did nothing
+	
+	
+				*/
+				int channel = 0;
+				//start 0 throttle
+				TIMA0_PWM_init(channel, MOTOR_PERIOD_TICKS, 0, INIT_THROTTLE );
 
+				for(volatile int i = 0; i < 500; i++) {
+            delay_1ms();
+        }
+    
+				/* Enable DC motors */
+				DC_ENABLE();
+				
+				TIMA0_PWM_DutyCycle(channel, 0.3);
+				/* SERVO Init */
+        //TIMA1_PWM_init(SERVO_CH, SERVO_PERIOD_TICKS, 0, servo_angle_to_duty(SERVO_CENTER_US));
 
+	return 0;
+}
+
+#endif // MAIN == 2
 //int main(void) {
 //	
 //		int angle = SERVO_CENTER_US;
