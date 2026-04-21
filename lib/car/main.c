@@ -30,7 +30,7 @@
 
 /* Filtering */
 //#define FILTER_WINDOW           5         // moving-average window
-//#define NO_TRACK_LIMIT          10        // watchdog threshold (frames)
+
 
 /* PID gains (tuned for hybrid control) */
 #define KP  1.50f
@@ -47,7 +47,7 @@
 #define STEARING_RAMP           0.01f    // smooth stearing
 
 /* Motor PWM (TIMA0) */
-#define MOTOR_EN true			//compile-time motor disable
+#define MOTOR_EN false			//compile-time motor disable
 #define MOTOR_PERIOD_TICKS      3200    
 #define LEFT_CH                 0
 #define RIGHT_CH                2
@@ -59,11 +59,11 @@
 #define TURN_THROTTLE           0.22f     // slowest throttle when steering
 #define THROTTLE_RAMP_UP        0.001f    // smooth acceleration/deceleration
 #define THROTTLE_RAMP_DOWN      0.1f     // smooth acceleration/deceleration
-
+#define THROTTLE_PID_SCALE 			0.007f  // afect pid had on throttle
 /* Differential steering */
 #define DIFF_SCALE              0.002f     //pid to diff scale
 #define DIFF_MAX                0.20f     // max difference
-#define DIFF_STEER_EN true								//use diff steering?
+#define DIFF_STEER_EN false								//use diff steering?
 
 /* Thresholding */
 #define THRESH_FACTOR           0.55f     // adaptive threshold factor (to account for different light levels)
@@ -74,7 +74,7 @@
 
 /* Carpet Stopping */
 #define CARPET_STOP false								//use carpet stopping?
-	
+#define NO_TRACK_LIMIT          10      // watchdog threshold (frames)
 
 
 	
@@ -109,13 +109,16 @@ Wanted to get max_throttle to 0.5 - > caused more oscillations, turned kp to 1.5
 turned off carpet stopping to stop this from stopping the car.
 Increase turn throttle to 0.25 - > helped with track sliding, turns a little wider but still makes it.
 
-battery fell to 7.7v over ~1.5 hours. Final values 7.7v, PID 1.5, 0.5, 0, MAX 0.5, TURN 0.25, scaler 2.7
+battery fell to 7.7v over ~1.5 hours. Final values 7.7v, P,D,I 1.5, 0.5, 0, MAX 0.5, TURN 0.25, scaler 2.7
 
 4/20/26
 implemented diff steering -> 0.2 seemesed a bit high, dorppded to 0.1.
 slowing down a bit slow -> throttle_pid_scale to 0.01 (maybe could be higher - test)
 camera at -20 degrees
 max throttle 0.5, turn 0.18, diff_scale 0.002
+measured 7.86 V
+charged battery 1 -> 8.25 v
+				battery 2 -> 8.46 v
 */
 
 
@@ -123,32 +126,74 @@ max throttle 0.5, turn 0.18, diff_scale 0.002
  *             				   GLOBAL VARIABLES
  * ============================================================ */
 
-		/* PID changable vals */
+	/* UART values */
+	#if UART_EN
+		char buf[BUF_SIZE];
+		
 		float kp = KP;
 		float ki = KI;
 		float kd = KD;
 		float pid_scaler = PID_SCALER;
 
-    float max_throttle = MAX_THROTTLE;
-    float turn_throttle = TURN_THROTTLE;
-    
-    #if DIFF_STEER_EN
-    float diff_scale = DIFF_SCALE;
+		float max_throttle = MAX_THROTTLE;
+		float turn_throttle = TURN_THROTTLE;
+		
+		float throttle_ramp_up = THROTTLE_RAMP_UP;
+		float throttle_ramp_down = THROTTLE_RAMP_DOWN;
+		
+		#if DIFF_STEER_EN
+		float diff_scale = DIFF_SCALE;
 		float diff_max = DIFF_MAX;
-		float throttle_pid_scale = 0.007f;
-    #endif //diff en
+		float throttle_pid_scale = THROTTLE_PID_SCALE;
+		
+		float throttle_pid_scale_saved = THROTTLE_PID_SCALE;
+		float diff_max_saved = DIFF_MAX;
+		float diff_scale_saved = DIFF_SCALE;
+		#endif //diff en
 
-	/* UART values */
-	#if UART_EN
 		float kp_saved = KP;
 		float ki_saved = KI;
 		float kd_saved = KD;
 		float pid_scaler_saved = PID_SCALER;
-    float max_throttle_saved = MAX_THROTTLE;
-    float turn_throttle_saved = TURN_THROTTLE;
-		char buf[BUF_SIZE];
-	#endif //UART_EN
+		float max_throttle_saved = MAX_THROTTLE;
+		float turn_throttle_saved = TURN_THROTTLE;
+	
 
+
+	//so we have all these constants that the program is using.
+	//we want to be able to change these over UART, but just be the value when not using it, not variables
+	//so... this is what i thought of.
+	//allows no-UART to be as fast as possible
+
+//variables
+		#define KP_MAC 									kp
+		#define KI_MAC  								ki
+		#define KD_MAC  								kd
+		#define PID_SCALER_MAC 					pid_scaler
+		#define MAX_THROTTLE_MAC 				max_throttle
+		#define TURN_THROTTLE_MAC				turn_throttle
+		#define THROTTLE_RAMP_UP_MAC		throttle_ramp_up
+		#define THROTTLE_RAMP_DOWN_MAC	throttle_ramp_down
+		#define THROTTLE_PID_SCALE_MAC	throttle_pid_scale
+		#define DIFF_SCALE_MAC					diff_scale
+		#define DIFF_MAX_MAC						diff_max
+		
+	#else //UART_EN
+	
+//macros	
+		#define KP_MAC 									KP
+		#define KI_MAC  								KI
+		#define KD_MAC  								KD
+		#define PID_SCALER_MAC 					PID_SCALER	
+		#define MAX_THROTTLE_MAC				MAX_THROTTLE	
+		#define TURN_THROTTLE_MAC				TURN_THROTTLE
+		#define THROTTLE_RAMP_UP_MAC		THROTTLE_RAMP_UP
+		#define THROTTLE_RAMP_DOWN_MAC	THROTTLE_RAMP_DOWN
+		#define THROTTLE_PID_SCALE_MAC	THROTTLE_PID_SCALE
+		#define DIFF_SCALE_MAC					DIFF_SCALE
+		#define DIFF_MAX_MAC						DIFF_MAX
+	#endif // UART_EN
+	
 /* ============================================================
  *                CAMERA CENTROID + THRESHOLDING
  * ============================================================ */
@@ -256,6 +301,8 @@ void handle_uart(char ch){
 				UART1_put("g : start car if stopped\r\n");
 				UART1_put("tXXX : max throttle to 0.xxx\r\n");
 				UART1_put("cXXX : turn/corner throttle to 0.xxx\r\n");
+				UART1_put("aXXX : throttle ramp up to 0.xxx\r\n");
+				UART1_put("zXXX : throttle ramp down to 0.xxx\r\n");
 			#if DIFF_STEER_EN
         UART1_put("kXXX : diff scale to 0.xxx\r\n");
 				UART1_put("LXXX : diff max to 0.xxx\r\n");
@@ -280,6 +327,11 @@ void handle_uart(char ch){
 				pid_scaler_saved = pid_scaler;
         max_throttle_saved = max_throttle;
         turn_throttle_saved = turn_throttle;
+				#if DIFF_STEER_EN
+				throttle_pid_scale_saved = throttle_pid_scale;
+				diff_max_saved = diff_max;
+				diff_scale_saved = diff_scale;
+			#endif // diff steer en
 				break;
 			case 'r':
 			case 'R':
@@ -290,6 +342,11 @@ void handle_uart(char ch){
 				pid_scaler = pid_scaler_saved;
         max_throttle = max_throttle_saved;
         turn_throttle = turn_throttle_saved;
+			#if DIFF_STEER_EN
+				throttle_pid_scale = throttle_pid_scale_saved;
+				diff_max = diff_max_saved;
+				diff_scale = diff_scale_saved;
+			#endif // diff steer en
 				break;
 			case 'v':
 			case 'V':
@@ -305,6 +362,10 @@ void handle_uart(char ch){
 				UART1_printFloat(max_throttle);
         UART1_put("\r\nturn_throttle\r\n");
 				UART1_printFloat(turn_throttle);
+				UART1_put("\r\nthrottle_ramp_up\r\n");
+				UART1_printFloat(throttle_ramp_up);
+        UART1_put("\r\nthrottle_ramp_down\r\n");
+				UART1_printFloat(throttle_ramp_down);
       #if DIFF_STEER_EN
         UART1_put("\r\ndiff_scale\r\n");
 				UART1_printFloat(diff_scale);
@@ -318,7 +379,7 @@ void handle_uart(char ch){
 			case 'p':
 			case 'P':
 				UART1_get(buf, BUF_SIZE);
-				kp = (float) str_to_int(buf) / (float) 1000;
+				KP_MAC = (float) str_to_int(buf) / (float) 1000;
 				//UART1_put(buf);
 				break;
 			case 'i':
@@ -348,6 +409,16 @@ void handle_uart(char ch){
         UART1_get(buf, BUF_SIZE);
 				turn_throttle = (float) str_to_int(buf) / (float) 1000;
         break;
+			case 'a':
+			case 'A':
+				UART1_get(buf, BUF_SIZE);
+				throttle_ramp_up = (float) str_to_int(buf) / (float) 1000;
+				break;
+			case 'z':
+			case 'Z':
+				UART1_get(buf, BUF_SIZE);
+				throttle_ramp_down = (float) str_to_int(buf) / (float) 1000;
+				break;
       #if DIFF_STEER_EN
       case 'k':
       case 'K':
@@ -364,10 +435,7 @@ void handle_uart(char ch){
 				UART1_get(buf, BUF_SIZE);
         throttle_pid_scale = (float) str_to_int(buf) / (float) 1000;
         break;
-			
-			
-			
-      #endif
+      #endif //DIFF_STEER_EN
 			case '\r':
 			case '\n':
 				break;
@@ -470,27 +538,27 @@ int main(void) {
 						pid_prev_error = pid_error;
 
 						/* PID output */
-						pid_output = (kp * pid_error) + (ki * pid_integral) + (kd * pid_derivative);
+						pid_output = (KP_MAC * pid_error) + (KI_MAC * pid_integral) + (KD_MAC * pid_derivative);
 
 						/* Servo steering using PID */
-						angle = SERVO_CENTER_US + (pid_output * pid_scaler); //adjust for how responsive we want the stearing control
+						angle = SERVO_CENTER_US + (pid_output * PID_SCALER_MAC); //adjust for how responsive we want the stearing control
 						if (angle < SERVO_MIN_US) {angle = SERVO_MIN_US;}
             else if (angle > SERVO_MAX_US) {angle = SERVO_MAX_US;}
             TIMA1_PWM_DutyCycle(SERVO_CH, servo_angle_to_duty(angle));
 
 						#if DIFF_STEER_EN
 						
-						float diff_k = pid_output * diff_scale;
+						float diff_k = pid_output * DIFF_SCALE_MAC;
 						if(diff_k > 1) diff_k = 1;
 						if(diff_k < -1) diff_k = -1;
 						
-						float throttle_k = pid_output * throttle_pid_scale;
+						float throttle_k = pid_output * THROTTLE_PID_SCALE_MAC;
 						if(throttle_k < 0) throttle_k = -throttle_k;
 						if(throttle_k > 1) throttle_k = 1;
 						
 						//test to make sure diff in correct direction, change -/+ if so (i think these are correct now
-						target_left = max_throttle - (throttle_k * (max_throttle - turn_throttle)) - (diff_k * diff_max);
-						target_right = max_throttle - (throttle_k * (max_throttle - turn_throttle)) + (diff_k * diff_max);
+						target_left = MAX_THROTTLE_MAC - (throttle_k * (MAX_THROTTLE_MAC - TURN_THROTTLE_MAC)) - (diff_k * DIFF_MAX_MAC);
+						target_right = MAX_THROTTLE_MAC - (throttle_k * (MAX_THROTTLE_MAC - TURN_THROTTLE_MAC)) + (diff_k * DIFF_MAX_MAC);
 					
 						if(target_left < 0) target_left = 0;
 						if(target_left > MAX_THROTTLE_ABSOLUTE) target_left = MAX_THROTTLE_ABSOLUTE;
@@ -501,17 +569,17 @@ int main(void) {
 						
 						/* Smooth ramp toward target */
 						if (throttle_left < target_left) {
-							throttle_left += THROTTLE_RAMP_UP;
+							throttle_left += THROTTLE_RAMP_UP_MAC;
 							if (throttle_left > target_left) throttle_left = target_left;
 						} else {
-							throttle_left -= THROTTLE_RAMP_DOWN;
+							throttle_left -= THROTTLE_RAMP_DOWN_MAC;
 							if (throttle_left < target_left) throttle_left = target_left;
 						}
 						if (throttle_right < target_right) {
-							throttle_right += THROTTLE_RAMP_UP;
+							throttle_right += THROTTLE_RAMP_UP_MAC;
 							if (throttle_right > target_right) throttle_right = target_right;
 						} else {
-							throttle_right -= THROTTLE_RAMP_DOWN;
+							throttle_right -= THROTTLE_RAMP_DOWN_MAC;
 							if (throttle_right < target_right) throttle_right = target_right;
 						}
 						
@@ -535,14 +603,14 @@ int main(void) {
 						- MAX_THROTTLE on straights
 						- TURN_THROTTLE in hard turns
 						*/
-						float target = max_throttle - (norm * (max_throttle - turn_throttle));
+						float target = MAX_THROTTLE_MAC - (norm * (MAX_THROTTLE_MAC - TURN_THROTTLE_MAC));
 
 						/* Smooth ramp toward target */
 						if (throttle < target) {
-							throttle += THROTTLE_RAMP_UP;
+							throttle += THROTTLE_RAMP_UP_MAC;
 							if (throttle > target) throttle = target;
 						} else {
-							throttle -= THROTTLE_RAMP_DOWN;
+							throttle -= THROTTLE_RAMP_DOWN_MAC;
 							if (throttle < target) throttle = target;
 						}
 
