@@ -54,8 +54,8 @@
 
 /* Throttle rules */
 #define INIT_THROTTLE           0.00f
-#define MAX_THROTTLE            0.43f     // never exceed 50%
-#define MAX_THROTTLE_ABSOLUTE		0.5f
+#define MAX_THROTTLE            0.48f     // never exceed 50%
+#define MAX_THROTTLE_ABSOLUTE		0.6f
 #define TURN_THROTTLE           0.22f     // slowest throttle when steering
 #define THROTTLE_RAMP_UP        0.001f    // smooth acceleration/deceleration
 #define THROTTLE_RAMP_DOWN      0.1f     // smooth acceleration/deceleration
@@ -73,13 +73,14 @@
 #define RIGHT_EN_MASK  (1U << 22)         // PA22
 
 /* Carpet Stopping */
-#define CARPET_STOP false								//use carpet stopping?
-#define NO_TRACK_LIMIT          10      // watchdog threshold (frames)
+#define CARPET_STOP true								//use carpet stopping?
+#define NO_TRACK_LIMIT          5      // watchdog threshold (frames)
 
 
 	
-/* UART */
-#define UART_EN true
+/* UART */ 
+#define UART_EN true 
+  
 #if UART_EN
 #include "uart.h"
 #include "uart_extras.h"
@@ -117,8 +118,8 @@ slowing down a bit slow -> throttle_pid_scale to 0.01 (maybe could be higher - t
 camera at -20 degrees
 max throttle 0.5, turn 0.18, diff_scale 0.002
 measured 7.86 V
-charged battery 1 -> 8.25 v
-				battery 2 -> 8.46 v
+charged battery 1 -> 8.25 v fell to 8.17 overnight. tested for ~hour dropped to 7.89 v
+				battery 2 -> 8.46 v fell to 8.15 overnight. tested for hour dropped to 7.6 v
 */
 
 
