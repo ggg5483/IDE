@@ -47,7 +47,7 @@
 #define STEARING_RAMP           0.01f    // smooth stearing
 
 /* Motor PWM (TIMA0) */
-#define MOTOR_EN false			//compile-time motor disable
+#define MOTOR_EN true			//compile-time motor disable
 #define MOTOR_PERIOD_TICKS      3200    
 #define LEFT_CH                 0
 #define RIGHT_CH                2
@@ -63,7 +63,7 @@
 /* Differential steering */
 #define DIFF_SCALE              0.002f     //pid to diff scale
 #define DIFF_MAX                0.20f     // max difference
-#define DIFF_STEER_EN false								//use diff steering?
+#define DIFF_STEER_EN true								//use diff steering?
 
 /* Thresholding */
 #define THRESH_FACTOR           0.55f     // adaptive threshold factor (to account for different light levels)
