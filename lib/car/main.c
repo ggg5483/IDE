@@ -158,13 +158,12 @@ charged battery 1 -> 8.25 v fell to 8.17 overnight. tested for ~hour dropped to 
 		float pid_scaler_saved = PID_SCALER;
 		float max_throttle_saved = MAX_THROTTLE;
 		float turn_throttle_saved = TURN_THROTTLE;
-	
 
 
 	//so we have all these constants that the program is using.
 	//we want to be able to change these over UART, but just be the value when not using it, not variables
 	//so... this is what i thought of.
-	//allows no-UART to be as fast as possible
+	//allows non-UART to be as fast as possible
 
 //variables
 		#define KP_MAC 									kp
@@ -298,16 +297,16 @@ void handle_uart(char ch){
 				UART1_put("s : save values\r\n");
 				UART1_put("r : restore values\r\n");
 				UART1_put("v : display values\r\n");
-				UART1_put("x<XXXX>: set pid_scaler to X.XXX\r\n");
+				UART1_put("x<XXXX>: set pid_scaler (turning) to XXXe-3\r\n");
 				UART1_put("g : start car if stopped\r\n");
-				UART1_put("tXXX : max throttle to 0.xxx\r\n");
+				UART1_put("tXXX : max throttle to XXXe-3\r\n");
 				UART1_put("cXXX : turn/corner throttle to 0.xxx\r\n");
-				UART1_put("aXXX : throttle ramp up to 0.xxx\r\n");
-				UART1_put("zXXX : throttle ramp down to 0.xxx\r\n");
+				UART1_put("aXXX : throttle ramp up to XXXe-3\r\n");
+				UART1_put("zXXX : throttle ramp down to XXXe-3\r\n");
 			#if DIFF_STEER_EN
-        UART1_put("kXXX : diff scale to 0.xxx\r\n");
-				UART1_put("LXXX : diff max to 0.xxx\r\n");
-				UART1_put("fXXX : throttle pid scale to 0.xxx\r\n");
+        UART1_put("kXXX : diff scale to XXXe-5\r\n");
+				UART1_put("LXXX : diff max to XXXe-3\r\n");
+				UART1_put("fXXX : throttle pid scale to XXXe-5\r\n");
 			#endif
 //				UART1_put("");
 //				UART1_put("");
@@ -424,7 +423,7 @@ void handle_uart(char ch){
       case 'k':
       case 'K':
         UART1_get(buf, BUF_SIZE);
-        diff_scale = (float) str_to_int(buf) / (float) 1000;
+        diff_scale = (float) str_to_int(buf) / (float) 100000;
         break;
 			case 'l':
 			case 'L':
@@ -434,7 +433,7 @@ void handle_uart(char ch){
 			case 'f':
 			case 'F':
 				UART1_get(buf, BUF_SIZE);
-        throttle_pid_scale = (float) str_to_int(buf) / (float) 1000;
+        throttle_pid_scale = (float) str_to_int(buf) / (float) 100000;
         break;
       #endif //DIFF_STEER_EN
 			case '\r':
