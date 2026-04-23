@@ -61,7 +61,7 @@
 #define THROTTLE_RAMP_DOWN      0.1f     // smooth acceleration/deceleration
 #define THROTTLE_PID_SCALE 			0.007f  // afect pid had on throttle
 /* Differential steering */
-#define DIFF_SCALE              0.002f     //pid to diff scale
+#define DIFF_SCALE              0.001f     //pid to diff scale
 #define DIFF_MAX                0.20f     // max difference
 #define DIFF_STEER_EN true								//use diff steering?
 
@@ -73,8 +73,8 @@
 #define RIGHT_EN_MASK  (1U << 22)         // PA22
 
 /* Carpet Stopping */
-#define CARPET_STOP true								//use carpet stopping?
-#define NO_TRACK_LIMIT          5      // watchdog threshold (frames)
+#define CARPET_STOP false								//use carpet stopping?
+#define NO_TRACK_LIMIT          10      // watchdog threshold (frames)
 
 
 	
@@ -120,6 +120,15 @@ max throttle 0.5, turn 0.18, diff_scale 0.002
 measured 7.86 V
 charged battery 1 -> 8.25 v fell to 8.17 overnight. tested for ~hour dropped to 7.89 v
 				battery 2 -> 8.46 v fell to 8.15 overnight. tested for hour dropped to 7.6 v
+				
+4/22/26
+7.9v
+at max speed -> diff scaler 0.0008 - 0.001 worked with diff max 0.2. too high and too low it likes to drift, wiped wheels another variable likely affecting this.
+throttle_pid_scaler it better a little higher -> slows faster, values from 0.007 to 0.008 worked well. I was working with 0.0075 and it was doing well.
+flipped occasionaly, mostly from being bumped by unstable track(from the car destroying it), is able to go around once before flipping, I'm not worried about it.
+
+not reacting fast enough -> raise camera.
+
 */
 
 
