@@ -56,12 +56,12 @@
 #define INIT_THROTTLE           0.00f
 #define MAX_THROTTLE            0.48f     // never exceed 50%
 #define MAX_THROTTLE_ABSOLUTE		0.6f
-#define TURN_THROTTLE           0.22f     // slowest throttle when steering
+#define TURN_THROTTLE           0.20f     // slowest throttle when steering
 #define THROTTLE_RAMP_UP        0.001f    // smooth acceleration/deceleration
 #define THROTTLE_RAMP_DOWN      0.1f     // smooth acceleration/deceleration
-#define THROTTLE_PID_SCALE 			0.007f  // afect pid had on throttle
+#define THROTTLE_PID_SCALE 			0.008f  // afect pid had on throttle
 /* Differential steering */
-#define DIFF_SCALE              0.001f     //pid to diff scale
+#define DIFF_SCALE              0.00125f     //pid to diff scale
 #define DIFF_MAX                0.20f     // max difference
 #define DIFF_STEER_EN true								//use diff steering?
 
