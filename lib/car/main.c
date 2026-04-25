@@ -76,7 +76,12 @@
 #define CARPET_STOP false								//use carpet stopping?
 #define NO_TRACK_LIMIT          10      // watchdog threshold (frames)
 
-
+#define INCLUDE_LIMITER true
+#if INCLUDE_LIMITER
+#define LIMIT_VAL 0.05f									//slow by 5%
+#include "switches.h"
+#include "leds.h"
+#endif // INCLUDE_LIMITER
 	
 /* UART */ 
 #define UART_EN true 
@@ -489,7 +494,12 @@ int main(void) {
     float pid_derivative = 0.0f;
     float pid_output = 0.0f;
 	
-
+		#if INCLUDE_LIMITER
+		bool limit = false;
+		LED2_init();
+		LED2_set(LED2_GREEN);
+		S2_init();
+		#endif //INCLUDE_LIMITER
 	
     
         /* Camera/ADC Init */
@@ -566,9 +576,22 @@ int main(void) {
 						if(throttle_k > 1) throttle_k = 1;
 						
 						//test to make sure diff in correct direction, change -/+ if so (i think these are correct now
+						#if INCLUDE_LIMITER
+						if(limit){
+							//go slightly slower
+							target_left = MAX_THROTTLE_MAC - LIMIT_VAL - (throttle_k * (MAX_THROTTLE_MAC - TURN_THROTTLE_MAC)) - (diff_k * DIFF_MAX_MAC);
+							target_right = MAX_THROTTLE_MAC - LIMIT_VAL - (throttle_k * (MAX_THROTTLE_MAC - TURN_THROTTLE_MAC)) + (diff_k * DIFF_MAX_MAC);
+						} else {
+							//regular speed
+							target_left = MAX_THROTTLE_MAC - (throttle_k * (MAX_THROTTLE_MAC - TURN_THROTTLE_MAC)) - (diff_k * DIFF_MAX_MAC);
+							target_right = MAX_THROTTLE_MAC - (throttle_k * (MAX_THROTTLE_MAC - TURN_THROTTLE_MAC)) + (diff_k * DIFF_MAX_MAC);
+						}
+						#else //INCLUDE_LIMITER	
 						target_left = MAX_THROTTLE_MAC - (throttle_k * (MAX_THROTTLE_MAC - TURN_THROTTLE_MAC)) - (diff_k * DIFF_MAX_MAC);
 						target_right = MAX_THROTTLE_MAC - (throttle_k * (MAX_THROTTLE_MAC - TURN_THROTTLE_MAC)) + (diff_k * DIFF_MAX_MAC);
-					
+						#endif //INCLUDE_LIMITER
+						
+						
 						if(target_left < 0) target_left = 0;
 						if(target_left > MAX_THROTTLE_ABSOLUTE) target_left = MAX_THROTTLE_ABSOLUTE;
 						
@@ -670,6 +693,19 @@ int main(void) {
 						}// if data available
 						#endif //UART_EN
 						
+						#if INCLUDE_LIMITER
+						//switch reading and limiting
+						if(S2_pressed()){
+							while(S2_pressed()){;}
+							if(limit){
+								limit = false;
+								LED2_set(LED2_GREEN);
+							} else {
+								limit = true;
+								LED2_set(LED2_RED);
+							}
+						}
+						#endif // INCLUDE_LIMITER
 						
         } // while 1, main driving loop
 				

@@ -5,11 +5,10 @@
   ../../source\ti/devices/msp/msp.h \
   ../../source\ti/devices/DeviceFamily.h \
   ../../source\ti/devices/msp/m0p/mspm0g350x.h \
-  C:/Keil_v5/ARM/PACK/ARM/CMSIS/5.9.0/CMSIS/Core/Include\core_cm0plus.h \
-  C:/Keil_v5/ARM/PACK/ARM/CMSIS/5.9.0/CMSIS/Core/Include/cmsis_version.h \
-  C:/Keil_v5/ARM/PACK/ARM/CMSIS/5.9.0/CMSIS/Core/Include/cmsis_compiler.h \
-  C:/Keil_v5/ARM/PACK/ARM/CMSIS/5.9.0/CMSIS/Core/Include/cmsis_armclang_ltm.h \
-  C:/Keil_v5/ARM/PACK/ARM/CMSIS/5.9.0/CMSIS/Core/Include/mpu_armv7.h \
+  C:/Keil_v5/ARM/PACK/ARM/CMSIS/5.0.1/CMSIS/Include\core_cm0plus.h \
+  C:/Keil_v5/ARM/PACK/ARM/CMSIS/5.0.1/CMSIS/Include/cmsis_compiler.h \
+  C:/Keil_v5/ARM/PACK/ARM/CMSIS/5.0.1/CMSIS/Include/cmsis_armclang.h \
+  C:\Keil_v5\ARM\ARMCLANG\Bin\..\include\arm_compat.h \
   ../../source\ti/devices/msp/peripherals/hw_adc12.h \
   ../../source\ti/devices/msp/peripherals/hw_aes.h \
   ../../source\ti/devices/msp/peripherals/hw_comp.h \
@@ -38,4 +37,4 @@
   ../../source\ti/devices/msp/peripherals/m0p/sysctl/hw_sysctl_mspm0g1x0x_g3x0x.h \
   ../../lib/car/switches.h ../../lib/car/camera.h ../../lib/car/adc12.h \
   ../../lib/car/timers.h ../../lib/car/uart_extras.h \
-  ../../lib/car/uart.h
+  ../../lib/car/leds.h ../../lib/car/uart.h

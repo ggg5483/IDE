@@ -455,6 +455,16 @@
               <FileType>5</FileType>
               <FilePath>..\..\lib\car\switches.h</FilePath>
             </File>
+            <File>
+              <FileName>leds.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\lib\car\leds.c</FilePath>
+            </File>
+            <File>
+              <FileName>leds.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\lib\car\leds.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
